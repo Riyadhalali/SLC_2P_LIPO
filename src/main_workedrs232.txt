@@ -9,7 +9,7 @@ const int rs = A3, en =A2, d4 = 13, d5 = 12, d6 = 11, d7 = 10;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 char t[32];
-
+const unsigned long timeoutDuration = 1000;  
 
 
 //-------------------------LIPO4 Functions-----------------------------------------------
@@ -18,7 +18,7 @@ uint16_t crc16(const uint8_t* data, uint8_t length);
 String getValue(String data, char separator, int index);
 bool matchesFormat(const String& value, const String& expected);
 bool isValidResponse(const String& data);
-
+void Read_LiPo4();
 
 
 // Some useful PIP commands
@@ -27,10 +27,8 @@ struct pipCommands_t {
 } pipCommands = {'Q', 'P', 'I', 'G', 'S'};
 
 void setup() {
-    Serial.begin(2400); // Serial Monitor Console Baud Setting
+Serial.begin(2400); // Serial Monitor Console Baud Setting
     //mySerial.begin(2400);  // Start serial communication with the inverter at 2400 baud
-
-
 //---------------------lcd
 pinMode(9,OUTPUT);
 digitalWrite(9,1);
@@ -46,12 +44,18 @@ lcd.clear();
 }
 
 void loop() {
-    // Send command to inverter
-    pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
+   Read_LiPo4();
+   
+}
+
+void Read_LiPo4()
+{
+     pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
 
     // Read and print the incoming serial data from the inverter until <CR>
     String receivedData = "";
     bool endOfResponse = false;  // Flag to indicate when end of response is found
+      unsigned long startTime = millis();  // Record the start time
 
     while (!endOfResponse) {
         if (Serial.available()) {
@@ -62,8 +66,16 @@ void loop() {
             if (incomingByte == '\r') {
                 endOfResponse = true;  // Stop reading when <CR> is found
             }
+
+
         }
-    }
+
+            if (millis() - startTime > timeoutDuration) {
+            lcd.setCursor(0,0);
+            lcd.print("timeout connect");
+            break;  // Exit the loop if timeout is reached
+            }
+    }  // end while 
 
     // Print the received data
    // Serial.print("Received Data: ");
@@ -78,14 +90,10 @@ void loop() {
         String batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
         //Serial.print("Battery Voltage: ");
         //Serial.println(batteryVoltage);
-   //      lcd.setCursor(0,0);
-     //    lcd.print(batteryVoltage+'v');
-
-        // Extract the battery capacity (10th index, 0-based)
-        
-       // Serial.print("Battery Capacity: ");
-      //  Serial.println(batteryCapacity+'%');
-        lcd.setCursor(1,1);
+         lcd.setCursor(0,0);
+         lcd.print(batteryVoltage+'V');
+ 
+        lcd.setCursor(0,1);
         lcd.print(batteryCapacity+'%');
       //  Serial.print("%");
     } else {
@@ -94,7 +102,6 @@ void loop() {
 
    // delay(100);  // Wait for 5 seconds before sending the next command
 }
-
 // Function to validate the received response format
 bool isValidResponse(const String& data) {
     // Ensure the data is long enough to have all expected parts

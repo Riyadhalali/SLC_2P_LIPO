@@ -18,7 +18,7 @@ uint16_t crc16(const uint8_t* data, uint8_t length);
 String getValue(String data, char separator, int index);
 bool matchesFormat(const String& value, const String& expected);
 bool isValidResponse(const String& data);
-
+void Read_LiPo4();
 
 
 // Some useful PIP commands
@@ -27,10 +27,8 @@ struct pipCommands_t {
 } pipCommands = {'Q', 'P', 'I', 'G', 'S'};
 
 void setup() {
-    Serial.begin(2400); // Serial Monitor Console Baud Setting
+Serial.begin(2400); // Serial Monitor Console Baud Setting
     //mySerial.begin(2400);  // Start serial communication with the inverter at 2400 baud
-
-
 //---------------------lcd
 pinMode(9,OUTPUT);
 digitalWrite(9,1);
@@ -46,8 +44,13 @@ lcd.clear();
 }
 
 void loop() {
-    // Send command to inverter
-    pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
+   Read_LiPo4();
+   
+}
+
+void Read_LiPo4()
+{
+     pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
 
     // Read and print the incoming serial data from the inverter until <CR>
     String receivedData = "";
@@ -99,7 +102,6 @@ void loop() {
 
    // delay(100);  // Wait for 5 seconds before sending the next command
 }
-
 // Function to validate the received response format
 bool isValidResponse(const String& data) {
     // Ensure the data is long enough to have all expected parts
