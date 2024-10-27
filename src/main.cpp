@@ -228,7 +228,6 @@ void TimerBattery();
 void SetVoltageMode(); 
 void SetUPSMode();
 void SetDS1307_Date();
-void SetBatteryVoltageError();
 void DelayOff();
 void SetBatteryType();
 //-------------------------LIPO4 Functions-----------------------------------------------
@@ -706,7 +705,7 @@ while (digitalRead(Set)==1 )
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
-    sprintf(txt,"[2] H:%02d-M:%02d",hours_lcd_2,minutes_lcd_2);
+   sprintf(txt,"[2] H:%02d-M:%02d",hours_lcd_2,minutes_lcd_2);
    lcd.setCursor(0,0);
    lcd.print(txt);
 if (digitalRead(Increment)==1 )
@@ -993,107 +992,121 @@ EEPROM.write(7,minutes_lcd_timer2_stop); // save minutes off timer_1 to eeprom
 delay(500); 
 }
 //--------------------------Set Battery Voltage---------------------------------
-void SetLowBatteryVoltage()
-{
+  void SetLowBatteryVoltage()
+  {
 
-delay(500);
-while (digitalRead(Set)==1 )
-{
-/*
-lcd.setCursor(0,0);
-lcd.print("[5] LV1");
-dtostrf(Mini_Battery_Voltage,4,1,txt);
-lcd.setCursor(8,0);
-lcd.print(txt);
-lcd.setCursor(12,0);
-if(batteryTypeLiPo4==0) lcd.print("V   "); 
-if(batteryTypeLiPo4==1) lcd.print("%   ");
-*/
-//-> to make sure that the value will never be changed until the user press increment or decrement
-while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
-{
+  delay(500);
+  while (digitalRead(Set)==1 )
+  {
+    
+  /*
+  lcd.setCursor(0,0);
+  lcd.print("[5] LV1");
+  dtostrf(Mini_Battery_Voltage,4,1,txt);
+  lcd.setCursor(8,0);
+  lcd.print(txt);
+  lcd.setCursor(12,0);
+  if(batteryTypeLiPo4==0) lcd.print("V   "); 
+  if(batteryTypeLiPo4==1) lcd.print("%   ");
+  */
+  //-> to make sure that the value will never be changed until the user press increment or decrement
+  while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
+  {
 lcd.setCursor(0,1);
 lcd.print("LV1");
+if(batteryTypeLiPo4==0)
+{
 dtostrf(Mini_Battery_Voltage,4,1,txt);
 lcd.setCursor(8,1);
 lcd.print(txt);
 lcd.setCursor(12,1);
-if(batteryTypeLiPo4==0) lcd.print("V   "); 
-if(batteryTypeLiPo4==1) lcd.print("%   ");
-
-//********************************************* */
-if (batteryTypeLiPo4==0)
-{
-if (digitalRead(Increment)==1)
-{
-delay(100);
-Mini_Battery_Voltage+=0.1;
-}
-
-if (digitalRead(Decrement)==1 )
-{
-delay(100);
-Mini_Battery_Voltage-=0.1;
-}
-} // end if batteryType
-//********************************************* */
-if (batteryTypeLiPo4==1)
-{
-if (digitalRead(Increment)==1)
-{
-delay(100);
-Mini_Battery_Voltage+=1.0;
-}
-
-if (digitalRead(Decrement)==1 )
-{
-delay(100);
-Mini_Battery_Voltage-=1.0;
-}
+lcd.print("V   "); 
 } 
-//*************************************************** */
-//-> perfect
-if (batteryTypeLiPo4==0)
-{
-if (Mini_Battery_Voltage>65) Mini_Battery_Voltage=0;
-if (Mini_Battery_Voltage<0) Mini_Battery_Voltage=0;
+ 
+if(batteryTypeLiPo4==1)
+{ 
+dtostrf(Mini_Battery_Voltage,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
 }
-else 
-{
-if (Mini_Battery_Voltage>100)    Mini_Battery_Voltage=100;
-if (Mini_Battery_Voltage<0)      Mini_Battery_Voltage=0;    
-}
-} // end while increment and decrement
-}
-//- save to eeporm
 
-EEPROM.put(8, Mini_Battery_Voltage);
+  //********************************************* */
+  if (batteryTypeLiPo4==0)
+  {
+  if (digitalRead(Increment)==1)
+  {
+  delay(100);
+  Mini_Battery_Voltage+=0.1;
+  }
+
+  if (digitalRead(Decrement)==1 )
+  {
+  delay(100);
+  Mini_Battery_Voltage-=0.1;
+  }
+  } // end if batteryType
+  //********************************************* */
+  if (batteryTypeLiPo4==1)
+  {
+  if (digitalRead(Increment)==1)
+  {
+  delay(100);
+  Mini_Battery_Voltage+=1.0;
+  }
+
+  if (digitalRead(Decrement)==1 )
+  {
+  delay(100);
+  Mini_Battery_Voltage-=1.0;
+  }
+  } 
+  //*************************************************** */
+  //-> perfect
+  if (batteryTypeLiPo4==0)
+  {
+  if (Mini_Battery_Voltage>65) Mini_Battery_Voltage=0;
+  if (Mini_Battery_Voltage<0) Mini_Battery_Voltage=0;
+  }
+  else 
+  {
+  if (Mini_Battery_Voltage>100)    Mini_Battery_Voltage=100;
+  if (Mini_Battery_Voltage<0)      Mini_Battery_Voltage=0;    
+  }
+  } // end while increment and decrement
+  }
+  //- save to eeporm
+
+  EEPROM.put(8, Mini_Battery_Voltage);
 //-------------------------------------T2-----------------------------------------
 
 delay(500);
 while (digitalRead(Set)==1 )
 {
-    /*
-lcd.setCursor(0,0);
-lcd.print("[5] LV2");
-dtostrf(Mini_Battery_Voltage_T2,4,1,txt);
-lcd.setCursor(8,0);
-lcd.print(txt);
-lcd.setCursor(12,0);
-if(batteryTypeLiPo4==0) lcd.print("V   "); 
-if(batteryTypeLiPo4==1) lcd.print("%   ");
-*/
+
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
 lcd.setCursor(0,1);
 lcd.print("LV2");
+if(batteryTypeLiPo4==0)
+{
 dtostrf(Mini_Battery_Voltage_T2,4,1,txt);
 lcd.setCursor(8,1);
 lcd.print(txt);
 lcd.setCursor(12,1);
-if(batteryTypeLiPo4==0) lcd.print("V   "); 
-if(batteryTypeLiPo4==1) lcd.print("%   ");
+lcd.print("V   "); 
+} 
+ 
+if(batteryTypeLiPo4==1)
+{ 
+dtostrf(Mini_Battery_Voltage_T2,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
+}
 //*********************************************************** */
 if(batteryTypeLiPo4==0){
 if (digitalRead(Increment)==1 )
@@ -1147,27 +1160,28 @@ void SetStartUpLoadsVoltage()
 delay(500);
 while (digitalRead(Set)==1 )
 {
-    /*
-lcd.setCursor(0,0);
-lcd.print("[6] HV1 ");
-dtostrf(StartLoadsVoltage,4,1,txt);
-lcd.setCursor(8,0);
-lcd.print(txt);
-lcd.setCursor(12,0);
-if(batteryTypeLiPo4==0) lcd.print("V   "); 
-if(batteryTypeLiPo4==1) lcd.print("%   ");
-*/
+
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
 lcd.setCursor(0,1);
 lcd.print("HV1 ");
+if(batteryTypeLiPo4==0)
+{
 dtostrf(StartLoadsVoltage,4,1,txt);
 lcd.setCursor(8,1);
 lcd.print(txt);
 lcd.setCursor(12,1);
-if(batteryTypeLiPo4==0) lcd.print("V   "); 
-if(batteryTypeLiPo4==1) lcd.print("%   ");
+lcd.print("V   "); 
+}
+if(batteryTypeLiPo4==1) 
+{
+dtostrf(StartLoadsVoltage,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
+}
 //********************************************** */
 if (batteryTypeLiPo4==0)
 {
@@ -1204,10 +1218,14 @@ if(batteryTypeLiPo4==0)
 if (StartLoadsVoltage>65)    StartLoadsVoltage=0;
 if (StartLoadsVoltage<0)     StartLoadsVoltage=0;
 }
-
+else 
+{
+if (StartLoadsVoltage>100)    StartLoadsVoltage=0;
+if (StartLoadsVoltage<0)     StartLoadsVoltage=0;
 }
-//--------------------------------------------------
 } // end while increment and decrement
+//--------------------------------------------------
+} 
 
 //- save to eeporm
 EEPROM.put(16,StartLoadsVoltage);
@@ -1230,12 +1248,22 @@ while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
 lcd.setCursor(0,1);
 lcd.print("HV2 ");
+if(batteryTypeLiPo4==0)
+{
 dtostrf(StartLoadsVoltage_T2,4,1,txt);
 lcd.setCursor(8,1);
 lcd.print(txt);
 lcd.setCursor(12,1);
-if(batteryTypeLiPo4==0) lcd.print("V   "); 
-if(batteryTypeLiPo4==1) lcd.print("%   ");
+lcd.print("V   "); 
+}
+if(batteryTypeLiPo4==1) 
+{
+dtostrf(StartLoadsVoltage_T2,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
+}
 //***************************************** */
 if(batteryTypeLiPo4==0)
 {
@@ -1272,7 +1300,11 @@ if (batteryTypeLiPo4==0)
 if (StartLoadsVoltage_T2>65)    StartLoadsVoltage_T2=0;
 if (StartLoadsVoltage_T2<0)     StartLoadsVoltage_T2=0;
 }
-
+else 
+{
+ if (StartLoadsVoltage_T2>100)    StartLoadsVoltage_T2=100;
+if (StartLoadsVoltage_T2<0)     StartLoadsVoltage_T2=0; 
+}
 
 } // end while increment and decrement
 }
@@ -1307,7 +1339,7 @@ delay(50);
 startupTIme_1--;
 }
 //-> perfect
-if (startupTIme_1>900)    startupTIme_1=900;
+if (startupTIme_1>900)    startupTIme_1=0;
 if (startupTIme_1<0) startupTIme_1=0;
 } // end while increment and decrement
 } // end first while
@@ -1336,7 +1368,7 @@ delay(50);
 startupTIme_2--;
 }
 
-if  (startupTIme_2>900) startupTIme_2=900;
+if  (startupTIme_2>900) startupTIme_2=0;
 if  (startupTIme_2<0) startupTIme_2=0;
 } // end while increment
 } // end first while
@@ -1371,7 +1403,7 @@ delay(50);
 offDelay_1--;
 }
 //-> perfect
-if (offDelay_1>240)    offDelay_1=240;
+if (offDelay_1>240)    offDelay_1=0;
 if (offDelay_1<0)     offDelay_1=0;
 } // end while increment and decrement
 } // end first while
@@ -1400,7 +1432,7 @@ delay(50);
 offDelay_2--;
 }
 
-if  (offDelay_2>240) offDelay_2=240;
+if  (offDelay_2>240) offDelay_2=0;
 if  (offDelay_2<0) offDelay_2=0;
 } // end while increment
 } // end first while
@@ -1424,7 +1456,7 @@ currentMillis_1=0,previousMiliis_1=0;
 currentMillis_2=0;previousMiliis_2=0;
 while (digitalRead(Set)==1 )
 {
-
+/*
    currentMillis_2=millis();
 	 if(currentMillis_2-previousMiliis_2 >=500)
 	 {
@@ -1441,7 +1473,10 @@ while (digitalRead(Set)==1 )
    lcd.setCursor(5,0);
 	 lcd.print("    ");
  	 }
-
+*/
+   sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
+   lcd.setCursor(0,0);
+   lcd.print(txt);
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
@@ -1470,13 +1505,14 @@ currentMillis_2=0;previousMiliis_2=0;
 delay(500); 
 while (digitalRead(Set)==1 )
 {
+  /*
    currentMillis_2=millis();
 	 if(currentMillis_2-previousMiliis_2 >=500)
 	 {
 	 previousMiliis_2=currentMillis_2;
-     sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
-  lcd.setCursor(0,0);
-  lcd.print(txt);
+   sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
+   lcd.setCursor(0,0);
+   lcd.print(txt);
 	 }
 
 	 currentMillis_1=millis();
@@ -1487,10 +1523,10 @@ while (digitalRead(Set)==1 )
 	 lcd.print("    ");
  	 }
 
-if (digitalRead(Exit)==1 )
-{
-break;     //break out of the while loop
-}
+*/
+   sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
+   lcd.setCursor(0,0);
+   lcd.print(txt);
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
@@ -1748,7 +1784,7 @@ lcd.print(txt);
 if(batteryTypeLiPo4==0)
 {
 lcd.setCursor(7,1);
-lcd.print("USER");
+lcd.print("USER ");
 }
 if(batteryTypeLiPo4==1)
 {
@@ -1950,6 +1986,7 @@ minutes_lcd_timer2_stop=EEPROM.read(7);
 //**********************************************
 ByPassState=0;   // enable is zero  // delete function to be programmed for rom spac
 Timer_Enable=1;      // delete function to be programmed for rom space
+VinBatteryDifference=0;
 RunOnBatteryVoltageMode=EEPROM.read(28);
 UPSMode=EEPROM.read(29) ;   // ups mode
 addError=EEPROM.read(30);
@@ -1961,7 +1998,7 @@ EEPROM.get(24,startupTIme_1);
 EEPROM.get(26,startupTIme_2);
 EEPROM.get(12,Mini_Battery_Voltage_T2);
 EEPROM.get(20,StartLoadsVoltage_T2);
-EEPROM.get(31,VinBatteryDifference);
+//EEPROM.get(31,VinBatteryDifference);
 EEPROM.get(35,offDelay_1);
 EEPROM.get(37,offDelay_2);
 }
@@ -2051,7 +2088,7 @@ EEPROM.write(6,17);    // writing off hours
 EEPROM.write(7,0);    // writing off minutes
 EEPROM.write(28,1);    // run on battery voltage mode
 EEPROM.write(29,1); // ups mode
-EEPROM.write(30,addError);
+//EEPROM.write(30,addError);
 EEPROM.write(50,batteryTypeLiPo4);  // default is user
 //**********************************************
 EEPROM.put(8,Mini_Battery_Voltage);
@@ -2060,7 +2097,7 @@ EEPROM.put(16,StartLoadsVoltage);
 EEPROM.put(20,StartLoadsVoltage_T2);
 EEPROM.put(24,startupTIme_1);
 EEPROM.put(26,startupTIme_2);
-EEPROM.put(31,VinBatteryDifference);
+//EEPROM.put(31,VinBatteryDifference);
 EEPROM.put(35,offDelay_1);
 EEPROM.put(37,offDelay_2);
 } // end if period
@@ -2072,7 +2109,7 @@ if (Vin_Battery>= 35 && Vin_Battery <= 70) SystemBatteryMode=48;
 else if (Vin_Battery>=18 && Vin_Battery <=32) SystemBatteryMode=24;
 else if (Vin_Battery >=1 && Vin_Battery<= 16 ) SystemBatteryMode=12;
 else if(Vin_Battery==0) SystemBatteryMode=24;
-// else SystemBatteryMode=24; // take it as default
+else SystemBatteryMode=24; // take it as default
 
 }
 //----------------------------------LCD Reconfig()---------------------------------
@@ -2386,21 +2423,6 @@ relayState_2=0;
 Start_Timer_0_A();         // give some time for battery voltage
 }
 }// end of check timers
-//------------------------Auto program For battery------------------------------
-//@this program used for running timers without battery and to be set auto
-void AutoRunWithOutBatteryProtection()
-{
- /* 
-if (Vin_Battery==0)
-{
-RunWithOutBattery=true;
-}
-else
-{
-RunWithOutBattery=false;
-}
-*/
-}
 //----------------------------------------Start Timer-+-----------------------------------------
 void Start_Timer_0_A()
 {
@@ -2677,7 +2699,7 @@ void TimerBattery()
 noInterrupts();
 TCCR2A=0; // very imprtant 
 TCCR2B = 0; // very important 
-OCR2A=50; // 10 ms 
+OCR2A=100; // 10 ms 
 TCCR2B |=  (1<< CS20) | (1 << CS21) | (1<<CS22) ;  // prescalar 1024
 TIMSK2 |= (1 << OCIE2A) ;  // enabling interrupts overflow 
 interrupts(); 
@@ -2742,14 +2764,14 @@ void Read_LiPo4()
             // Check for carriage return '\r'
             if (incomingByte == '\r') {
                 endOfResponse = true;  // Stop reading when <CR> is found
-                bmsErrorFlag=0;
+                
             }
 
 
         }
 
             if (millis() - startTime_inverter > timeout_inverter) {
-            bmsErrorFlag=1;
+            
             lcd.setCursor(0,0);
             lcd.print("timeout");
 
@@ -2773,21 +2795,6 @@ void Read_LiPo4()
        // Serial.println("Response is NOT accepted.");
             batteryCapacity="0";
             batteryVoltage="0";
- 
-       
-       // when timeout failes and the loads want to start if the connection restored the loads 
-       // will start imediatly so i make time varriables restarted once again from zero.
-        /* 
-       CutSecondsRealTime_T1=0;
-       CountCutSecondsRealTime_T1=0;
-       CountSecondsRealTimePv_ReConnect_T1=0;
-       SecondsRealTimePv_ReConnect_T1=0;
-       CutSecondsRealTime_T2=0;
-       CountCutSecondsRealTime_T2=0;
-       CountSecondsRealTimePv_ReConnect_T2=0;
-       SecondsRealTimePv_ReConnect_T2=0;
-*/ 
-
 
     }  // end else 
 
@@ -2960,7 +2967,6 @@ void loop() {
   CheckForSet(); // done 
   RunTimersNowCheck(); // done 
   WorkingMode();   // done 
-  AutoRunWithOutBatteryProtection();
   CheckForTimerActivationInRange();  // done
   CheckForTimerActivationOutRange();  // done
   Screen_1();  // done 
