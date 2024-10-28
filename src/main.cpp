@@ -2974,5 +2974,5 @@ void loop() {
   TurnLoadsOffWhenGridOff();  // done
   CheckWireTimeout(); 
   CheckSystemBatteryMode();  // done
-  delay(50);
+  delay(50); 
  }
