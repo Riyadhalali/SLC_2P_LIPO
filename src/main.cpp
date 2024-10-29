@@ -156,6 +156,8 @@ double VinBatteryError=0;
     const unsigned long timeout_inverter = 2000;  // Set timeout to 2 seconds (2000 milliseconds)
     String formattedBatteryVoltage,formattedBatteryCapacity;
     char bmsErrorFlag=0;
+
+    
 //-----------------------------------------------------------------------------
 struct pipCommands_t{
   unsigned char qpigs[5];
@@ -351,9 +353,10 @@ Read_Time();
 }
 else
 {
+ 
   lcd.setCursor(0,0);
   lcd.print("V-MODE ");
-
+  
 }
 
 if (batteryTypeLiPo4==0)
@@ -379,6 +382,7 @@ DateTime now = rtc.now();
 sprintf(t, "%02d:%02d   ", now.hour(), now.minute());
 lcd.setCursor(0,0);
 lcd.print(t);
+
 }
 //------------------------------------Read Battery------------------------------------
 //--------------------------Read Battery Voltage--------------------------------
@@ -531,6 +535,7 @@ case 11 :
    break ; 
 case 12 :
 {
+  /*
    DateTime now = rtc.now();
    set_ds1307_hours=now.hour();
    set_ds1307_minutes=now.minute();
@@ -540,6 +545,9 @@ case 12 :
    sprintf((char*)txt,"[12] H:%02d-M:%02d  ",set_ds1307_hours,set_ds1307_minutes);
    lcd.setCursor(0,0);
    lcd.print(txt);
+   */
+   lcd.setCursor(0,0);
+   lcd.print("[12]    RTC     ");
    while (digitalRead(Set)==0)
    {
    SetDS1307_Time();    
@@ -558,12 +566,12 @@ while (digitalRead(Increment)==1 || digitalRead(Decrement)==1)
 {
 if (digitalRead(Increment)==1)
 {
-  delay(150);
+  delay(200);
   programNumber++; 
 }
 if(digitalRead(Decrement)==1)
 {
-  delay(150);
+  delay(200);
   programNumber--;  
 }
 if (programNumber>12)  programNumber=12;
@@ -1009,6 +1017,25 @@ delay(500);
   if(batteryTypeLiPo4==0) lcd.print("V   "); 
   if(batteryTypeLiPo4==1) lcd.print("%   ");
   */
+ lcd.setCursor(0,1);
+lcd.print("LV1");
+if(batteryTypeLiPo4==0)
+{
+dtostrf(Mini_Battery_Voltage,4,1,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("V   "); 
+} 
+ 
+if(batteryTypeLiPo4==1)
+{ 
+dtostrf(Mini_Battery_Voltage,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
+}
   //-> to make sure that the value will never be changed until the user press increment or decrement
   while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
   {
@@ -1084,7 +1111,25 @@ lcd.print("%   ");
 delay(500);
 while (digitalRead(Set)==1 )
 {
-
+lcd.setCursor(0,1);
+lcd.print("LV2");
+if(batteryTypeLiPo4==0)
+{
+dtostrf(Mini_Battery_Voltage_T2,4,1,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("V   "); 
+} 
+ 
+if(batteryTypeLiPo4==1)
+{ 
+dtostrf(Mini_Battery_Voltage_T2,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
+}
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
@@ -1160,6 +1205,25 @@ void SetStartUpLoadsVoltage()
 delay(500);
 while (digitalRead(Set)==1 )
 {
+
+  lcd.setCursor(0,1);
+lcd.print("HV1 ");
+if(batteryTypeLiPo4==0)
+{
+dtostrf(StartLoadsVoltage,4,1,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("V   "); 
+}
+if(batteryTypeLiPo4==1) 
+{
+dtostrf(StartLoadsVoltage,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
+}
 
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
@@ -1243,6 +1307,24 @@ lcd.setCursor(12,0);
 if(batteryTypeLiPo4==0) lcd.print("V   "); 
 if(batteryTypeLiPo4==1) lcd.print("%   ");
 */
+lcd.setCursor(0,1);
+lcd.print("HV2 ");
+if(batteryTypeLiPo4==0)
+{
+dtostrf(StartLoadsVoltage_T2,4,1,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("V   "); 
+}
+if(batteryTypeLiPo4==1) 
+{
+dtostrf(StartLoadsVoltage_T2,4,0,txt);
+lcd.setCursor(8,1);
+lcd.print(txt);
+lcd.setCursor(12,1);
+lcd.print("%   ");
+}
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
@@ -1449,9 +1531,12 @@ DateTime now = rtc.now();
 delay(500);
 set_ds1307_hours=now.hour();
 set_ds1307_minutes=now.minute();
-set_ds1307_day=now.day();
-set_ds1307_month=now.month();
-set_ds1307_year=now.year();
+//set_ds1307_day=now.day();
+//set_ds1307_month=now.month();
+//set_ds1307_year=now.year();
+set_ds1307_day=1;
+set_ds1307_month=1;
+set_ds1307_year=24;
 currentMillis_1=0,previousMiliis_1=0;
 currentMillis_2=0;previousMiliis_2=0;
 while (digitalRead(Set)==1 )
@@ -1552,7 +1637,9 @@ if (set_ds1307_minutes<0)     set_ds1307_minutes=0;
 rtc.adjust(DateTime(set_ds1307_year,set_ds1307_month,set_ds1307_day,set_ds1307_hours, set_ds1307_minutes, 0));
 lcd.clear();
 delay(500);
+} // end this function
 //------------------------------------------SET DATE--------------------------------------------
+/*
 while (digitalRead(Set)==1 )
 {
 sprintf(txt,"[12] %02d/%02d/%04d",set_ds1307_day,set_ds1307_month,set_ds1307_year);
@@ -1631,7 +1718,7 @@ rtc.adjust(DateTime(set_ds1307_year,set_ds1307_month,set_ds1307_day,set_ds1307_h
 lcd.clear();
 delay(500);
 } // end setDS1307
-
+*/
 //----------------------------------SET VOLTAGE MODE-------------------------------------------
 void SetVoltageMode()
 {
@@ -1678,9 +1765,6 @@ void SetUPSMode()
 delay(500);
 while (digitalRead(Set)==1)
 {
-sprintf(txt,"[11]  UPS Mode   ");
-lcd.setCursor(0,0);
-lcd.print(txt); 
 
 if(UPSMode==0)
 {
@@ -1777,9 +1861,6 @@ void SetBatteryType()
 delay(500);
 while (digitalRead(Set)==1)
 {
-sprintf(txt,"[5]  Batt Type  ");
-lcd.setCursor(0,0);
-lcd.print(txt); 
 
 if(batteryTypeLiPo4==0)
 {
@@ -2737,13 +2818,25 @@ void WorkingMode()
 	{
 		digitalWrite(Flash,1);
 	}
-	else
+	else if(batteryTypeLiPo4 ==0 )
 	{
 	digitalWrite(Flash,1);
   delay(500);
   digitalWrite(Flash,0);
   delay(500);
   }
+  
+  else if(batteryTypeLiPo4==1 && bmsErrorFlag==0) // connection is success
+  {
+  digitalWrite(Flash,1);
+  delay(100);
+  digitalWrite(Flash,0);
+  delay(100);
+  }
+  else {
+    digitalWrite(Flash,0);
+  }
+  
 
 }
 
@@ -2764,6 +2857,7 @@ void Read_LiPo4()
             // Check for carriage return '\r'
             if (incomingByte == '\r') {
                 endOfResponse = true;  // Stop reading when <CR> is found
+                bmsErrorFlag=0; // connection is success
                 
             }
 
@@ -2774,6 +2868,7 @@ void Read_LiPo4()
             
             lcd.setCursor(0,0);
             lcd.print("timeout");
+            bmsErrorFlag=1;
 
             break;  // Exit the loop if timeout is reached
             }
@@ -2838,17 +2933,17 @@ bool isValidResponse(const String& data) {
 
     // Validate each expected part of the response
     String expectedFormats[] = {
-        "000.0", // BBB.B
+        "000.0", // BBB.B  
         "00.0",  // CC.C
         "000.0", // DDD.D
         "00.0",  // EE.E
         "0000",  // FFFF
         "0000",  // GGGG
-        "000",   // HHH
+        "000",   // HHH   load in kw
         "339",   // III
-        "25.60", // JJ.JJ
+        "25.60", // JJ.JJ battery voltage
         "000",   // KKK
-        "100",   // OOO
+        "100",   // OOO   battery capacity 
         "0030"   // TTTT
     };
 
@@ -2963,7 +3058,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
- // CheckForParams();
+  //CheckForParams();
   CheckForSet(); // done 
   RunTimersNowCheck(); // done 
   WorkingMode();   // done 
