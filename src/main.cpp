@@ -97,8 +97,8 @@ unsigned int Timer_Counter_2=0, Timer_Counter_3=0,Timer_Counter_4=0;
 unsigned int Low_PV_Voltage=50;       // PV panels low voltage
 bool Grid_Already_On=false;            // to not enter conditions as the grid is available
 unsigned short old_timer_1=0,old_timer_2=0,temp=0;
-unsigned int startupTIme_1=0,startupTIme_2=0;  // 25 seconds for load one to start up and 50 seconds for load 2 to startup
-unsigned int offDelay_1=0,offDelay_2=0;
+int startupTIme_1=0,startupTIme_2=0;  // 25 seconds for load one to start up and 50 seconds for load 2 to startup
+int offDelay_1=0,offDelay_2=0;
 char updateScreen=0;
 float arrayBatt[21];
 float StartLoadsVoltage=0,StartLoadsVoltage_T2=0;
@@ -1339,7 +1339,7 @@ delay(50);
 startupTIme_1--;
 }
 //-> perfect
-if (startupTIme_1>900)    startupTIme_1=0;
+if (startupTIme_1>900)    startupTIme_1=900;
 if (startupTIme_1<0) startupTIme_1=0;
 } // end while increment and decrement
 } // end first while
@@ -1368,7 +1368,7 @@ delay(50);
 startupTIme_2--;
 }
 
-if  (startupTIme_2>900) startupTIme_2=0;
+if  (startupTIme_2>900) startupTIme_2=900;
 if  (startupTIme_2<0) startupTIme_2=0;
 } // end while increment
 } // end first while
@@ -1403,7 +1403,7 @@ delay(50);
 offDelay_1--;
 }
 //-> perfect
-if (offDelay_1>240)    offDelay_1=0;
+if (offDelay_1>240)    offDelay_1=240;
 if (offDelay_1<0)     offDelay_1=0;
 } // end while increment and decrement
 } // end first while
@@ -1432,7 +1432,7 @@ delay(50);
 offDelay_2--;
 }
 
-if  (offDelay_2>240) offDelay_2=0;
+if  (offDelay_2>240) offDelay_2=240;
 if  (offDelay_2<0) offDelay_2=0;
 } // end while increment
 } // end first while
