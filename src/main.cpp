@@ -149,15 +149,15 @@ double VinBatteryError=0;
 //-variables for the LiPo4
     String receivedData = "";
     bool endOfResponse = false;  // Flag to indicate when end of response is found
-    String batteryVoltage;
-    String batteryCapacity;
+    String batteryVoltage="";
+    String batteryCapacity="";
     char batteryTypeLiPo4=1; 
     unsigned long startTime_inverter ; // Record the time when we started waiting
-    const unsigned long timeout_inverter = 2000;  // Set timeout to 2 seconds (2000 milliseconds)
-    String formattedBatteryVoltage,formattedBatteryCapacity;
+    const unsigned long timeout_inverter = 1000;  // Set timeout to 2 seconds (2000 milliseconds)
+    String formattedBatteryVoltage="",formattedBatteryCapacity="";
     char bmsErrorFlag=0;
     float loadKW;
-    String batteryDischargeCurrent;
+    String batteryDischargeCurrent="";
 
     
 //-----------------------------------------------------------------------------
@@ -254,6 +254,7 @@ pinMode(Backlight,OUTPUT);  // backlight
 pinMode(Exit,INPUT);  // set Exit as input 
 pinMode(Flash,OUTPUT);
 }
+
 //-------------------------------------Config---------------------------------------------------
 void Config()
 {
@@ -272,8 +273,7 @@ Wire.begin();
 rtc.begin();
 Wire.setWireTimeout(1000,true);   //refe : https://www.fpaynter.com/2020/07/i2c-hangup-bug-cured-miracle-of-miracles-film-at-11/
 Wire.clearWireTimeoutFlag();
-Serial.begin(2400); // for inverter 
-
+Serial.begin(2400);
 }
 //----------------------------------Config Interrupts-----------------------------------
 void Config_Interrupts()
@@ -358,6 +358,7 @@ else
  
   lcd.setCursor(0,0);
   lcd.print("V-MODE ");
+  delay(1000);
   
 }
 
@@ -367,6 +368,7 @@ Read_Battery();
 }
 else 
 {
+
 //-> display on LCD for lithium 
 Read_LiPo4(); 
 if (bmsErrorFlag==0) 
@@ -446,7 +448,7 @@ case 1:
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-   SetTimerOn_1();
+    SetTimerOn_1();
    }
    break ; 
 case 2: 
@@ -2852,10 +2854,25 @@ void WorkingMode()
 
 }
 
+void clearSerialBuffer() {
+    bool dataLeft = true;
+    int retries = 0;
+
+    while (dataLeft && retries < 10) {  // Retry a limited number of times
+        dataLeft = false;  // Assume no data
+        while (Serial.available() > 0) {
+            Serial.read();  // Read any available data
+            dataLeft = true; // Data was actually present
+        }
+        retries++;
+        delay(10);  // Short delay to allow more bytes to come in if there are any left
+    }
+}
+
 void Read_LiPo4()
 {
+     Serial.flush(); 
      pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
-
     // Read and print the incoming serial data from the inverter until <CR>
      receivedData = "";
      endOfResponse = false;  // Flag to indicate when end of response is found
@@ -2870,6 +2887,9 @@ void Read_LiPo4()
             if (incomingByte == '\r') {
                 endOfResponse = true;  // Stop reading when <CR> is found
                 bmsErrorFlag=0; // connection is success
+                lcd.setCursor(7,0);
+                lcd.print("   ");
+                delay(200);
                 
             }
 
@@ -2878,8 +2898,9 @@ void Read_LiPo4()
 
             if (millis() - startTime_inverter > timeout_inverter) {
             
-           // lcd.setCursor(0,0);
-           // lcd.print("timeout");
+            // lcd.setCursor(0,0);
+            // lcd.print("timeout");
+                        // Flush any data in the transmission buffer
             bmsErrorFlag=1;
             break;  // Exit the loop if timeout is reached
             }
@@ -2902,7 +2923,10 @@ void Read_LiPo4()
     else 
     {
 
-       // Serial.println("Response is NOT accepted.");
+           // Serial.println("Response is NOT accepted.");
+           // lcd.setCursor(0,0);
+           // lcd.print("[E]   ");
+
             batteryCapacity="0";
             batteryVoltage="0";
             batteryDischargeCurrent="0";
@@ -3075,7 +3099,7 @@ void pipSend(unsigned char *cmd, int len) {
     // Send command to inverter
     for (int i = 0; i < len; i++) {
         Serial.write(cmd[i]);
-    }
+      }
 
     // Send CRC and carriage return
     Serial.write(crc & 0xFF);  // CRC low byte
