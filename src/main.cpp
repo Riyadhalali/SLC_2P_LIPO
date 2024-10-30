@@ -156,6 +156,8 @@ double VinBatteryError=0;
     const unsigned long timeout_inverter = 2000;  // Set timeout to 2 seconds (2000 milliseconds)
     String formattedBatteryVoltage,formattedBatteryCapacity;
     char bmsErrorFlag=0;
+    float loadKW;
+    String batteryDischargeCurrent;
 
     
 //-----------------------------------------------------------------------------
@@ -262,10 +264,10 @@ digitalWrite(Backlight,1);
 lcd.begin(16,2);
 lcd.clear();
 lcd.noCursor();
-//lcd.setCursor(0,0);
-//lcd.print(" SLC LiPo4 V3.0 ");
-//delay(1500);
-//lcd.clear();
+lcd.setCursor(0,0);
+lcd.print(" SLC LiPo4 V1.0 ");
+delay(1500);
+lcd.clear();
 Wire.begin();
 rtc.begin();
 Wire.setWireTimeout(1000,true);   //refe : https://www.fpaynter.com/2020/07/i2c-hangup-bug-cured-miracle-of-miracles-film-at-11/
@@ -366,7 +368,17 @@ Read_Battery();
 else 
 {
 //-> display on LCD for lithium 
-Read_LiPo4();
+Read_LiPo4(); 
+if (bmsErrorFlag==0) 
+{
+  lcd.setCursor(7,0);
+  lcd.print("BMS");
+}
+else 
+{
+   lcd.setCursor(7,0);
+  lcd.print("   "); 
+}
 }
 
 //CalculateAC();  //for displaying grid is available 
@@ -379,7 +391,7 @@ lcd.print(relayState);
 void Read_Time()
 {
 DateTime now = rtc.now();
-sprintf(t, "%02d:%02d   ", now.hour(), now.minute());
+sprintf(t, "%02d:%02d  ", now.hour(), now.minute());
 lcd.setCursor(0,0);
 lcd.print(t);
 
@@ -2866,10 +2878,9 @@ void Read_LiPo4()
 
             if (millis() - startTime_inverter > timeout_inverter) {
             
-            lcd.setCursor(0,0);
-            lcd.print("timeout");
+           // lcd.setCursor(0,0);
+           // lcd.print("timeout");
             bmsErrorFlag=1;
-
             break;  // Exit the loop if timeout is reached
             }
     }  // end while 
@@ -2882,6 +2893,10 @@ void Read_LiPo4()
         // Extract and print battery voltage
         batteryVoltage = getValue(receivedData, ' ', 8);  // 9th item (index 8)
         batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
+       // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
+        batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
+        
+
 
     } 
     else 
@@ -2890,6 +2905,7 @@ void Read_LiPo4()
        // Serial.println("Response is NOT accepted.");
             batteryCapacity="0";
             batteryVoltage="0";
+            batteryDischargeCurrent="0";
 
     }  // end else 
 
@@ -2910,7 +2926,8 @@ void Read_LiPo4()
        }
 
         formattedBatteryVoltage = batteryVoltage.substring(0, 4); // Keep only "24.3
-        sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
+       // sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
+        sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
         lcd.setCursor(0,1);
         lcd.print(txt);
 
@@ -2920,31 +2937,50 @@ void Read_LiPo4()
 // Function to validate the received response format
 bool isValidResponse(const String& data) {
     // Ensure the data is long enough to have all expected parts
-    if (data.length() < 40) {
+    if (data.length() < 80) {  // 40 default worked value 
         return false;
     }
   
-    
+  // response : (BBB.B CC.C DDD.D EE.E FFFF GGGG HHH III JJ.JJ KKK OOO TTTT EE.E UUU.U WW.WW PPPPP b7b6b5b4b3b2b1b0 QQ VV MMMMM b10b9b8 Y ZZ AAAA BB.B<CRC><cr> 
 
     // Remove the starting '(' and ending character for processing
     String content = data.substring(1, data.length() - 1);
     int startIndex = 0;
     int spaceIndex;
 
-    // Validate each expected part of the response
+  //  // Validate each expected part of the response
+  //   String expectedFormats[] = {
+  //       "000.0", // BBB.B  
+  //       "00.0",  // CC.C
+  //       "000.0", // DDD.D
+  //       "00.0",  // EE.E
+  //       "0000",  // FFFF
+  //       "0000",  // GGGG
+  //       "000",   // HHH   load in kw
+  //       "339",   // III
+  //       "25.60", // JJ.JJ battery voltage
+  //       "000",   // KKK
+  //       "100",   // OOO   battery capacity 
+  //       "0030"   // TTTT
+  //   };
+  //-> this expected string with battery discharge current 
     String expectedFormats[] = {
-        "000.0", // BBB.B  
-        "00.0",  // CC.C
-        "000.0", // DDD.D
-        "00.0",  // EE.E
-        "0000",  // FFFF
-        "0000",  // GGGG
-        "000",   // HHH   load in kw
-        "339",   // III
-        "25.60", // JJ.JJ battery voltage
-        "000",   // KKK
-        "100",   // OOO   battery capacity 
-        "0030"   // TTTT
+    "000.0",  // BBB.B  
+    "00.0",   // CC.C
+    "000.0",  // DDD.D
+    "00.0",   // EE.E
+    "0000",   // FFFF
+    "0000",   // GGGG
+    "000",    // HHH   load in kw
+    "339",    // III
+    "25.60",  // JJ.JJ battery voltage
+    "000",    // KKK
+    "100",    // OOO   battery capacity 
+    "0030",   // TTTT
+    "00.0",   // EE.E   input pv1 
+    "000.0",  // UUU.U  input pv2 
+    "00.00",  // WW.WW  battery voltage from scc
+    "00000"   // PPPPP   battery discharge current 
     };
 
     for (int i = 0; i < sizeof(expectedFormats) / sizeof(expectedFormats[0]); i++) {
