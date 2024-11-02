@@ -295,7 +295,9 @@ if(programNumber==0)
 // lcd.print("Loading");
 }
 
-//EIFR |= (1 << INTF0);  // Clear INTF0 by writing a 1 to it
+EIFR |= (1 << INTF0);  // Clear INTF0 by writing a 1 to it
+delay(100); // give some time to inverter to respond
+
 } 
 //-------------------------------When Grid is Turned Off---------------------------------------------------------
 void Interrupt_INT1()
@@ -337,6 +339,8 @@ relayState_2=0;
 
 }
 
+delay(500);
+
 }
 //-----------------------------------------Screen 1-------------------------------------------------
 void Screen_1()
@@ -373,6 +377,10 @@ else
 
 //-> display on LCD for lithium 
 Read_LiPo4(); 
+
+// sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
+// lcd.setCursor(0,1);
+// lcd.print(txt);
 if (bmsErrorFlag==0) 
 {
   lcd.setCursor(7,0);
@@ -2623,7 +2631,10 @@ if (UpdateScreenTime==60 && programNumber==0 )  // 1800 is 60 seconds to update
 }
 //------------------------------------------------------------------------------------------
 TurnLoadsOffWhenGridOff(); // just to check that what matter happens the loads will switch off even if mcu got stuck 
-}
+delay(100);  
+
+
+ }
 
  //-------------------------------------Wire Timeout----------------------------------------------
  /*
@@ -2872,6 +2883,8 @@ void clearSerialBuffer() {
 
 void Read_LiPo4()
 {
+
+  
      
      pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
     // Read and print the incoming serial data from the inverter until <CR>
@@ -2968,9 +2981,6 @@ void Read_LiPo4()
         lcd.setCursor(0,1);
         lcd.print(txt);
 
-      //  if(batteryTypeLiPo4==1) Vin_Battery=formattedBatteryCapacity.toDouble();  // i moved it to here because it was making problems in reading
-
-  
 }
 //-------------------------------------------------------------------------------------------
 // Function to validate the received response format
