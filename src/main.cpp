@@ -288,12 +288,14 @@ UpdateScreenTime=0; // if user pressed the button zero counter of dipslay backli
 digitalWrite(Backlight,1);
 if(programNumber==0)
 {
-lcd.begin(16,2);
-lcd.clear();
-lcd.noCursor();
-lcd.setCursor(0,0);
-lcd.print("Loading");
+// lcd.begin(16,2);
+// lcd.clear();
+// lcd.noCursor();
+// lcd.setCursor(0,0);
+// lcd.print("Loading");
 }
+
+//EIFR |= (1 << INTF0);  // Clear INTF0 by writing a 1 to it
 } 
 //-------------------------------When Grid is Turned Off---------------------------------------------------------
 void Interrupt_INT1()
@@ -376,11 +378,11 @@ if (bmsErrorFlag==0)
   lcd.setCursor(7,0);
   lcd.print("BMS");
 }
-else 
-{
+ else 
+ {
    lcd.setCursor(7,0);
-  lcd.print("   "); 
-}
+   lcd.print("   "); 
+ }
 }
 
 //CalculateAC();  //for displaying grid is available 
@@ -1500,7 +1502,7 @@ offDelay_1--;
 }
 //-> perfect
 if (offDelay_1>240)    offDelay_1=240;
-if (offDelay_1<0)     offDelay_1=0;
+if (offDelay_1<1)     offDelay_1=1;
 } // end while increment and decrement
 } // end first while
 EEPROM.put(35,offDelay_1);
@@ -1529,7 +1531,7 @@ offDelay_2--;
 }
 
 if  (offDelay_2>240) offDelay_2=240;
-if  (offDelay_2<0) offDelay_2=0;
+if  (offDelay_2<1) offDelay_2=1;
 } // end while increment
 } // end first while
 lcd.clear();
@@ -2600,7 +2602,8 @@ interrupts();
 //--------------------------------------Timer Interrupt----------------------------------------
 ISR(TIMER1_COMPA_vect) 
 {
-TCNT1=0;   // very important 
+   TCNT1=0;   // very important 
+
   UpdateScreenTime++;
   
   if (CountSecondsRealTime==1) SecondsRealTime++;                                     // for counting real time for  grid count
@@ -2608,7 +2611,7 @@ TCNT1=0;   // very important
   if(CountSecondsRealTimePv_ReConnect_T2==1) SecondsRealTimePv_ReConnect_T2++; // for counting real timer 
   if(CountCutSecondsRealTime_T1==1) CutSecondsRealTime_T1++; 
   if(CountCutSecondsRealTime_T2==1) CutSecondsRealTime_T2++; 
-if (UpdateScreenTime==180 && programNumber==0 )  // 1800 is 60 seconds to update
+if (UpdateScreenTime==60 && programNumber==0 )  // 1800 is 60 seconds to update
 {
   UpdateScreenTime=0;
   digitalWrite(Backlight,0);
@@ -2616,7 +2619,7 @@ if (UpdateScreenTime==180 && programNumber==0 )  // 1800 is 60 seconds to update
   lcd.clear();
   lcd.noCursor();
   lcd.setCursor(0,0); 
-  lcd.noDisplay();
+ // lcd.noDisplay();
 }
 //------------------------------------------------------------------------------------------
 TurnLoadsOffWhenGridOff(); // just to check that what matter happens the loads will switch off even if mcu got stuck 
@@ -2819,10 +2822,8 @@ sum=0;
 samplesReading=0;
 }
 } // end if batterytype
-if(batteryTypeLiPo4==1)
-{
-Vin_Battery=formattedBatteryCapacity.toDouble();
-}
+if (batteryTypeLiPo4==1) Vin_Battery=formattedBatteryCapacity.toDouble(); 
+
 }
 
 //---------------------------------------WORKING MODE----------------------------------------------
@@ -2871,7 +2872,7 @@ void clearSerialBuffer() {
 
 void Read_LiPo4()
 {
-     Serial.flush(); 
+     
      pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
     // Read and print the incoming serial data from the inverter until <CR>
      receivedData = "";
@@ -2879,7 +2880,7 @@ void Read_LiPo4()
      startTime_inverter = millis();  // Record the start time
 
     while (!endOfResponse) {
-        if (Serial.available()) {
+        if (Serial.available()>0) { // very important 
             char incomingByte = Serial.read();
             receivedData += incomingByte;
 
@@ -2900,7 +2901,6 @@ void Read_LiPo4()
             
             // lcd.setCursor(0,0);
             // lcd.print("timeout");
-                        // Flush any data in the transmission buffer
             bmsErrorFlag=1;
             break;  // Exit the loop if timeout is reached
             }
@@ -2921,18 +2921,30 @@ void Read_LiPo4()
 
     } 
     else 
-    {
+    {    
+            // getting data but reponse is not acceptable 
 
+            bmsErrorFlag=1;
            // Serial.println("Response is NOT accepted.");
-           // lcd.setCursor(0,0);
-           // lcd.print("[E]   ");
-
             batteryCapacity="0";
             batteryVoltage="0";
             batteryDischargeCurrent="0";
+            // lcd.setCursor(0,0);
+            // lcd.print("Error ");  
+            // delay(500);
+
 
     }  // end else 
 
+
+ //-.Sometimes after inverter power off and then on, sometimes values is zero but bms is working 
+ //-> so if bms working and variables are empty must restart the connection 
+
+//  if (bmsErrorFlag==0 && batteryCapacity=="0" )
+//  {
+//   lcd.setCursor(10,1);
+//   lcd.print("error");
+//  }
     //-> display lcd 
      if (batteryCapacity == "100") 
        {
@@ -2950,10 +2962,13 @@ void Read_LiPo4()
        }
 
         formattedBatteryVoltage = batteryVoltage.substring(0, 4); // Keep only "24.3
+        
        // sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
         sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
         lcd.setCursor(0,1);
         lcd.print(txt);
+
+      //  if(batteryTypeLiPo4==1) Vin_Battery=formattedBatteryCapacity.toDouble();  // i moved it to here because it was making problems in reading
 
   
 }
@@ -3127,7 +3142,7 @@ void loop() {
   Screen_1();  // done 
   Check_Timers();  // done
   TurnLoadsOffWhenGridOff();  // done
-  CheckWireTimeout(); 
+  CheckWireTimeout();        // done 
   CheckSystemBatteryMode();  // done
-  delay(50); 
+  delay(50);                 // done 
  }
