@@ -413,10 +413,10 @@ lcd.print(t);
 void Read_Battery()
 {
 
-lcd.setCursor(0,1);
-lcd.print("V=");
+//lcd.setCursor(0,1);
+//lcd.print("V=");
 dtostrf(Vin_Battery,4,1,txt);
-lcd.setCursor(2,1);
+lcd.setCursor(0,1);
 lcd.print(txt);
 }
 
@@ -2120,7 +2120,7 @@ if ( digitalRead(Increment)==1  && digitalRead(Decrement)==1)
 {
 delay(1000);
 EEPROM_FactorySettings(1);        // summer time
-delay(100);
+//delay(100);
 EEPROM_Load();    // read the new values from epprom
 lcd.setCursor(0,1);
 lcd.print("Factory Settings");
@@ -2826,9 +2826,12 @@ Battery[samplesReading]=((10.5/0.5)*Battery_Voltage);
 sum+=Battery[samplesReading];
 if (samplesReading==100)
 {
-Vin_Battery_=sum / 100.0;   // i can make it 20 samples but because the smd coil is making problem
-if (addError==1) Vin_Battery=Vin_Battery_+VinBatteryDifference;
-else if(addError==0)  Vin_Battery=Vin_Battery_-VinBatteryDifference;
+// Vin_Battery_=sum / 50.0;   // i can make it 20 samples but because the smd coil is making problem
+// if (addError==1) Vin_Battery=Vin_Battery_+VinBatteryDifference;
+// else if(addError==0)  Vin_Battery=Vin_Battery_-VinBatteryDifference;
+// sum=0;
+// samplesReading=0;
+Vin_Battery=sum / 100.0;   // i can make it 20 samples but because the smd coil is making problem
 sum=0;
 samplesReading=0;
 }
@@ -2842,7 +2845,7 @@ void WorkingMode()
 {
 	if (digitalRead(AC_Available)==0)
 	{
-		digitalWrite(Flash,1);
+	digitalWrite(Flash,1);
 	}
 	else if(batteryTypeLiPo4 ==0 )
 	{
@@ -2945,6 +2948,11 @@ void Read_LiPo4()
             // lcd.setCursor(0,0);
             // lcd.print("Error ");  
             // delay(500);
+            Serial.end(); 
+            delay(500);
+            Serial.begin(2400);
+
+        
 
 
     }  // end else 
