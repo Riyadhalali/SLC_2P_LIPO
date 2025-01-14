@@ -41,10 +41,10 @@ batteryTypeLiPo4=50
 const int rs = A3, en =A2, d4 = 13, d5 = 12, d6 = 11, d7 = 10;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-//-----------------------------------------Defines------------------------------
+//---------------------------Defines------------------------------
 RTC_DS3231 rtc;
 char t[32];
- //---------------------------------Defines-------------------------------------
+ //--------------------------Defines-------------------------------------
  #define Relay_L_Solar 6
  #define Relay_L_Solar_2 7
  #define Set 2
@@ -94,7 +94,7 @@ char SolarOnGridOff=0,SolarOffGridOn=0;
 char SolarOnGridOff_2=0,SolarOffGridOn_2=0;
 char Timer_isOn=0,Timer_2_isOn=0;
 unsigned int Timer_Counter_2=0, Timer_Counter_3=0,Timer_Counter_4=0;
-unsigned int Low_PV_Voltage=50;       // PV panels low voltage
+unsigned int Low_PV_Voltage=50;        // PV panels low voltage
 bool Grid_Already_On=false;            // to not enter conditions as the grid is available
 unsigned short old_timer_1=0,old_timer_2=0,temp=0;
 int startupTIme_1=0,startupTIme_2=0;  // 25 seconds for load one to start up and 50 seconds for load 2 to startup
@@ -164,6 +164,8 @@ double VinBatteryError=0;
 struct pipCommands_t{
   unsigned char qpigs[5];
 } pipCommands = {'Q', 'P', 'I', 'G', 'S'};
+
+
 //-----------------------------------Functions---------------------------------
 void EEPROM_Load();
 void Gpio_Init();
@@ -266,7 +268,7 @@ lcd.begin(16,2);
 lcd.clear();
 lcd.noCursor();
 lcd.setCursor(0,0);
-lcd.print(" SLC LiPo4 V1.0 ");
+lcd.print(" SLC LiPo4 V1.1 ");
 delay(1500);
 lcd.clear();
 Wire.begin();
@@ -296,7 +298,7 @@ if(programNumber==0)
 }
 
 EIFR |= (1 << INTF0);  // Clear INTF0 by writing a 1 to it
-delay(100); // give some time to inverter to respond
+delay(100); // give some time to inverter to respond very important 
 
 } 
 //-------------------------------When Grid is Turned Off---------------------------------------------------------
@@ -453,12 +455,12 @@ while (digitalRead(Set)==1)
 switch (programNumber)
 {
 case 1: 
-  sprintf(txt,"[1] H:%02d-M:%02d   ",hours_lcd_1,minutes_lcd_1);
+   sprintf(txt,"[1] H:%02d-M:%02d   ",hours_lcd_1,minutes_lcd_1);
    lcd.setCursor(0,0);
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-    SetTimerOn_1();
+   SetTimerOn_1();
    }
    break ; 
 case 2: 
@@ -2153,7 +2155,7 @@ void EEPROM_FactorySettings(char period)
 {
 if(period==1) // summer  timer
 {
-if(SystemBatteryMode==12)
+if(SystemBatteryMode==12 )
 {
 Mini_Battery_Voltage=12.0;
 StartLoadsVoltage=13.0;
@@ -2174,13 +2176,22 @@ StartLoadsVoltage=51.0;
 Mini_Battery_Voltage_T2=50.0,
 StartLoadsVoltage_T2=52.0;
 }
-startupTIme_1 =10;
-startupTIme_2=20;
-offDelay_1=0;
-offDelay_2=0;
+
+// if(batteryTypeLiPo4==1) 
+// {
+// Mini_Battery_Voltage=60.0;
+// StartLoadsVoltage=80.0;
+// Mini_Battery_Voltage_T2=70.0,
+// StartLoadsVoltage_T2=90.0; 
+// }
+startupTIme_1 =180;
+startupTIme_2=240;
+offDelay_1=15;
+offDelay_2=25;
 addError=1;
 VinBatteryDifference=0.0;
-batteryTypeLiPo4=1;
+batteryTypeLiPo4=0; // default is user battery 
+
 //*****************timer 1****************
 EEPROM.write(0,8);  // writing start hours
 EEPROM.write(1,0);    // writing  start minutes
@@ -2192,7 +2203,7 @@ EEPROM.write(5,0);    // writing  start minutes
 EEPROM.write(6,17);    // writing off hours
 EEPROM.write(7,0);    // writing off minutes
 EEPROM.write(28,1);    // run on battery voltage mode
-EEPROM.write(29,1); // ups mode
+EEPROM.write(29,1);   // ups mode default is on 
 //EEPROM.write(30,addError);
 EEPROM.write(50,batteryTypeLiPo4);  // default is user
 //**********************************************
@@ -2932,6 +2943,7 @@ void Read_LiPo4()
         batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
        // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
         batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
+
         
 
 
@@ -2998,8 +3010,8 @@ bool isValidResponse(const String& data) {
         return false;
     }
   
-  // response : (BBB.B CC.C DDD.D EE.E FFFF GGGG HHH III JJ.JJ KKK OOO TTTT EE.E UUU.U WW.WW PPPPP b7b6b5b4b3b2b1b0 QQ VV MMMMM b10b9b8 Y ZZ AAAA BB.B<CRC><cr> 
-
+  // response :                          (BBB.B CC.C DDD.D EE.E FFFF GGGG HHH III JJ.JJ KKK OOO TTTT EE.E UUU.U WW.WW PPPPP b7b6b5b4b3b2b1b0 QQ VV MMMMM b10b9b8 Y ZZ AAAA BB.B<CRC><cr> 
+  // resonse from AXPERT MAX E TWIN 11K :(000.0 00.0 229.9 50.0 01542 01229 014 457 55.70 000 100 0041 03.3 378.6 00.00 00000 00010000 00 00 01273 010 0 00 0000u 
     // Remove the starting '(' and ending character for processing
     String content = data.substring(1, data.length() - 1);
     int startIndex = 0;
@@ -3021,46 +3033,96 @@ bool isValidResponse(const String& data) {
   //       "0030"   // TTTT
   //   };
   //-> this expected string with battery discharge current 
-    String expectedFormats[] = {
-    "000.0",  // BBB.B  
-    "00.0",   // CC.C
-    "000.0",  // DDD.D
-    "00.0",   // EE.E
-    "0000",   // FFFF
-    "0000",   // GGGG
-    "000",    // HHH   load in kw
-    "339",    // III
-    "25.60",  // JJ.JJ battery voltage
-    "000",    // KKK
-    "100",    // OOO   battery capacity 
-    "0030",   // TTTT
-    "00.0",   // EE.E   input pv1 
-    "000.0",  // UUU.U  input pv2 
-    "00.00",  // WW.WW  battery voltage from scc
-    "00000"   // PPPPP   battery discharge current 
+    // String expectedFormats[] = {
+    // "000.0",  // BBB.B  
+    // "00.0",   // CC.C
+    // "000.0",  // DDD.D
+    // "00.0",   // EE.E
+    // "0000",   // FFFF
+    // "0000",   // GGGG
+    // "000",    // HHH   load in kw
+    // "339",    // III
+    // "25.60",  // JJ.JJ battery voltage
+    // "000",    // KKK
+    // "100",    // OOO   battery capacity 
+    // "0030",   // TTTT
+    // "00.0",   // EE.E   input pv1 
+    // "000.0",  // UUU.U  input pv2 
+    // "00.00",  // WW.WW  battery voltage from scc
+    // "00000"   // PPPPP   battery discharge current 
+    // };
+
+    
+    // String expectedFormats[] = {
+    // "000.0",  // BBB.B  
+    // "00.0",   // CC.C
+    // "000.0",  // DDD.D
+    // "00.0",   // EE.E
+    // "00000",   // FFFFF
+    // "00000",   // GGGGG
+    // "000",    // HHH   load in kw
+    // "339",    // III
+    // "25.60",  // JJ.JJ battery voltage
+    // "000",    // KKK
+    // "100",    // OOO   battery capacity 
+    // "0030",   // TTTT
+    // "00.0",   // EE.E   input pv1 
+    // "000.0",  // UUU.U  input pv2 
+    // "00.00",  // WW.WW  battery voltage from scc
+    // "00000"   // PPPPP   battery discharge current 
+    // };
+//->
+//     String expectedFormatsMaxETwin[] = {
+//     "000.0",
+//      "00.0", 
+//      "000.0",
+//      "00.0", 
+//      "00000",
+//      "00000",
+//      "000",
+//      "000",
+//      "00.00",
+//      "000",
+//      "000",
+//      "0000",
+//      "00.0",
+//      "000.0",
+//      "00.00",
+//      "00000"
+// };
+  // Define multiple expected formats
+    String expectedFormats[][16] = {
+
+
+        { "000.0", "00.0", "000.0", "00.0", "00000", "00000", "000", "000", "00.00", "000", "000", "0000", "00.0", "000.0", "00.00", "00000" },  // VMII
+       // { "BBB.B", "CC.C", "DDD.D", "EE.E", "FFFF", "GGGG", "HHH", "III", "JJ.JJ", "KKK", "OOO", "TTTT", "EE.E", "UUU.U", "WW.WW", "PPPPP" }     //MAX E TWIN 
     };
 
-    for (int i = 0; i < sizeof(expectedFormats) / sizeof(expectedFormats[0]); i++) {
-        spaceIndex = content.indexOf(' ', startIndex);
-        String segment;
 
-        // If no space is found, this is the last segment
-        if (spaceIndex == -1) {
-            segment = content.substring(startIndex);
-        } else {
-            segment = content.substring(startIndex, spaceIndex);
+    // Loop through each format array and test all expected formats then test it and return only true if mataches any format 
+    for (int f = 0; f < sizeof(expectedFormats) / sizeof(expectedFormats[0]); f++) {
+        startIndex = 0;
+        bool isFormatValid = true;
+
+        for (int i = 0; i < 16; i++) {
+            spaceIndex = content.indexOf(' ', startIndex);
+            String segment = (spaceIndex == -1) ? content.substring(startIndex) : content.substring(startIndex, spaceIndex);
+
+            if (!matchesFormat(segment, expectedFormats[f][i])) {
+                isFormatValid = false;
+                break;
+            }
+            startIndex = spaceIndex + 1;
         }
 
-        // Check the segment against the expected format
-        if (!matchesFormat(segment, expectedFormats[i])) {
-            return false; // Format mismatch
+        // If one format matches, return true
+        if (isFormatValid) {
+            return true;
         }
-
-        // Move startIndex to the next part
-        startIndex = spaceIndex + 1;
     }
 
-    return true; // All parts match the expected format
+    // No formats matched
+    return false;
 }
 
 // Function to check if a segment matches the expected format
