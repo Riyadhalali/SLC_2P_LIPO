@@ -2761,7 +2761,7 @@ ISR(TIMER1_COMPA_vect)
 if (UpdateScreenTime==60 && programNumber==0 )  // 1800 is 60 seconds to update
 {
   UpdateScreenTime=0;
- // digitalWrite(Backlight,0);
+  digitalWrite(Backlight,0);
   lcd.begin(16,2);
   lcd.clear();
   lcd.noCursor();
