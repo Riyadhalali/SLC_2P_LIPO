@@ -54,7 +54,7 @@ char t[32];
  #define Backlight 9
  #define Exit A0
  #define Flash 4
-
+ #define LONG_PRESS_DURATION 2000
 //-----------------------------------------Variables----------------------------
 //unsigned short old_time_compare_pv,old_time_update_pv,old_time_screen_1=0,old_time_screen_2=0; // to async
 char set_status=0;    //variable for the set button state
@@ -64,8 +64,8 @@ char seconds_lcd_2=0,minutes_lcd_2=0,hours_lcd_2=0;
 char hours_lcd_timer2_start=0,hours_lcd_timer2_stop=0,seconds_lcd_timer2_start=0;
 char minutes_lcd_timer2_start=0,minutes_lcd_timer2_stop=0,seconds_lcd_timer2_stop=0;
 char Relay_State; // variable for toggling relay
-char set_ds1307_minutes=0,set_ds1307_hours=0,set_ds1307_seconds=0,set_ds1307_day=0,set_ds1307_month=0;
-uint16_t set_ds1307_year=2023;
+char set_ds1307_minutes=0,set_ds1307_hours=0,set_ds1307_seconds=0,set_ds1307_day=1,set_ds1307_month=1;
+uint16_t set_ds1307_year=2024;
 char ByPassState=0;    //enabled is default 0 is enabled and 1 is disabled
 float Battery_Voltage,PV_Voltage,Vin_PV,Vin_PV_Old=0,Vin_PV_Present=0;
 char BatteryVoltageSystem=0; // to save the battery voltage system if it is 12v/24v/48v
@@ -159,6 +159,10 @@ double VinBatteryError=0;
     float loadKW;
     String batteryDischargeCurrent="";
 
+
+//- variable for long press 
+bool insideSetup=false;
+char exitProgrampress=500;
     
 //-----------------------------------------------------------------------------
 struct pipCommands_t{
@@ -236,6 +240,7 @@ void SetUPSMode();
 void SetDS1307_Date();
 void DelayOff();
 void SetBatteryType();
+bool isLongPress();
 //-------------------------LIPO4 Functions-----------------------------------------------
 void pipSend(unsigned char *cmd, int len);
 uint16_t crc16(const uint8_t* data, uint8_t length);
@@ -268,12 +273,12 @@ lcd.begin(16,2);
 lcd.clear();
 lcd.noCursor();
 lcd.setCursor(0,0);
-lcd.print(" SLC LiPo4 V1.1 ");
+lcd.print(" SLC LiPo4 V1.2 ");
 delay(1500);
 lcd.clear();
 Wire.begin();
 rtc.begin();
-Wire.setWireTimeout(1000,true);   //refe : https://www.fpaynter.com/2020/07/i2c-hangup-bug-cured-miracle-of-miracles-film-at-11/
+Wire.setWireTimeout(3000,true);   //refe : https://www.fpaynter.com/2020/07/i2c-hangup-bug-cured-miracle-of-miracles-film-at-11/
 Wire.clearWireTimeoutFlag();
 Serial.begin(2400);
 }
@@ -445,11 +450,12 @@ lcd.clear();
 lcd.setCursor(0,0);
 lcd.print("Setup Program");
 programNumber=1;
+insideSetup=true;
 digitalWrite(Flash,0); // turn off flash
 delay(1500);
 //---------------------------------Enter Programs ------------------------------
 //-> enter setup mode and don't exit it until the user hit set button
-while (digitalRead(Set)==1)
+while (insideSetup)
 {
 
 switch (programNumber)
@@ -460,8 +466,24 @@ case 1:
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-   SetTimerOn_1();
-   }
+              SetTimerOn_1();
+
+              //  unsigned long pressTime = millis();
+              //   while (digitalRead(Set) == 0) 
+              //   {
+              //       if (millis() - pressTime > exitProgrampress)  
+              //       {
+              //           delay(200);  // Debouncing
+
+              //           insideSetup=false;
+              //           lcd.setCursor(0,0);
+              //           lcd.print("Exiting Program");
+              //           delay(1000);
+              //           return;   // to exit setup 
+              //       }
+              //   }
+    }
+   
    break ; 
 case 2: 
    sprintf(txt,"[2] H:%02d-M:%02d   ",hours_lcd_2,minutes_lcd_2);
@@ -470,6 +492,18 @@ case 2:
    while (digitalRead(Set)==0)
    {
    SetTimerOff_1();
+
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
+   
    }
    break ; 
 case 3: 
@@ -479,6 +513,16 @@ case 3:
    while (digitalRead(Set)==0)
    {
    SetTimerOn_2();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 
@@ -489,6 +533,16 @@ case 4 :
    while (digitalRead(Set)==0)
    {
    SetTimerOff_2();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 
@@ -500,6 +554,16 @@ case 4 :
    while (digitalRead(Set)==0)
    {
    SetBatteryType();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 
@@ -510,6 +574,16 @@ case 6:
    while (digitalRead(Set)==0)
    {
    SetLowBatteryVoltage();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 case 7:
@@ -519,6 +593,16 @@ case 7:
    while (digitalRead(Set)==0)
    {
    SetStartUpLoadsVoltage();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 case 8:
@@ -528,6 +612,16 @@ case 8:
    while (digitalRead(Set)==0)
    {
     Startup_Timers();
+                //  unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 
@@ -538,6 +632,16 @@ case 8:
    while (digitalRead(Set)==0)
    {
     DelayOff();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 case 10 :
@@ -547,6 +651,16 @@ case 10 :
    while (digitalRead(Set)==0)
    {
    SetVoltageMode();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 
@@ -557,6 +671,16 @@ case 11 :
    while (digitalRead(Set)==0)
    {
    SetUPSMode();
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 case 12 :
@@ -577,14 +701,19 @@ case 12 :
    while (digitalRead(Set)==0)
    {
    SetDS1307_Time();    
+                // unsigned long pressTime = millis();
+                // while (digitalRead(Set) == 0) 
+                // {
+                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                //     {
+                //         delay(200);  // Debouncing
+                //         insideSetup=false;
+                //         return;  // الخروج من SetUpProgram بالكامل
+                //     }
+                // }
    }
    break ; 
 }
-
-
-
-
-
 }   // end switch numbers 
 
 //---------------------------------------------NAVIGATION----------------------------------------
@@ -600,10 +729,9 @@ if(digitalRead(Decrement)==1)
   delay(200);
   programNumber--;  
 }
-if (programNumber>12)  programNumber=12;
-if (programNumber<1)   programNumber=1;
+if (programNumber>12)  programNumber=1;
+if (programNumber<1)   programNumber=12;
 } // end while increment and decrement 
-
 }  // end main while 
 }  // end function 
 //-----------------------------Setting Hour Timer 1-----------------------------
@@ -1591,7 +1719,7 @@ while (digitalRead(Set)==1 )
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
-   sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
+  sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
   lcd.setCursor(0,0);
   lcd.print(txt);
 if (digitalRead(Increment)==1 )
@@ -2184,13 +2312,13 @@ StartLoadsVoltage_T2=52.0;
 // Mini_Battery_Voltage_T2=70.0,
 // StartLoadsVoltage_T2=90.0; 
 // }
-startupTIme_1 =180;
-startupTIme_2=240;
+startupTIme_1 =15;
+startupTIme_2=20;
 offDelay_1=15;
 offDelay_2=25;
 addError=1;
 VinBatteryDifference=0.0;
-batteryTypeLiPo4=0; // default is user battery 
+batteryTypeLiPo4=1; // default is user battery 
 
 //*****************timer 1****************
 EEPROM.write(0,8);  // writing start hours
@@ -2633,7 +2761,7 @@ ISR(TIMER1_COMPA_vect)
 if (UpdateScreenTime==60 && programNumber==0 )  // 1800 is 60 seconds to update
 {
   UpdateScreenTime=0;
-  digitalWrite(Backlight,0);
+ // digitalWrite(Backlight,0);
   lcd.begin(16,2);
   lcd.clear();
   lcd.noCursor();
@@ -3201,6 +3329,9 @@ void pipSend(unsigned char *cmd, int len) {
     Serial.write(crc >> 8);    // CRC high byte
     Serial.write(0x0d);        // Carriage return
 }
+
+//-------------------------------------------------------------------------------------------------
+
 
 //---------------------------------------MAIN LOOP-------------------------------------------------
 void setup() {
