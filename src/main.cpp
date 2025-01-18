@@ -273,7 +273,7 @@ lcd.begin(16,2);
 lcd.clear();
 lcd.noCursor();
 lcd.setCursor(0,0);
-lcd.print(" SLC LiPo4 V1.3 ");
+lcd.print(" SLC LiPo4 V1.4 ");
 delay(1500);
 lcd.clear();
 Wire.begin();
@@ -553,7 +553,7 @@ case 4 :
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-   //SetBatteryType();
+   SetBatteryType();
                 // unsigned long pressTime = millis();
                 // while (digitalRead(Set) == 0) 
                 // {
@@ -670,7 +670,7 @@ case 11 :
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-   //SetUPSMode();
+   SetUPSMode();
                 // unsigned long pressTime = millis();
                 // while (digitalRead(Set) == 0) 
                 // {
@@ -3023,104 +3023,104 @@ void clearSerialBuffer() {
     }
 }
 
-void Read_LiPo4()
-{
+// void Read_LiPo4()
+// {
 
   
      
-     pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
-    // Read and print the incoming serial data from the inverter until <CR>
-     receivedData = "";
-     endOfResponse = false;  // Flag to indicate when end of response is found
-     startTime_inverter = millis();  // Record the start time
+//      pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
+//     // Read and print the incoming serial data from the inverter until <CR>
+//      receivedData = "";
+//      endOfResponse = false;  // Flag to indicate when end of response is found
+//      startTime_inverter = millis();  // Record the start time
 
-    while (!endOfResponse) {
-        if (Serial.available()>0) { // very important 
-            char incomingByte = Serial.read();
-            receivedData += incomingByte;
+//     while (!endOfResponse) {
+//         if (Serial.available()>0) { // very important 
+//             char incomingByte = Serial.read();
+//             receivedData += incomingByte;
 
-            // Check for carriage return '\r'
-            if (incomingByte == '\r') {
-                endOfResponse = true;  // Stop reading when <CR> is found
-                bmsErrorFlag=0; // connection is success
-                lcd.setCursor(7,0);
-                lcd.print("   ");
-                delay(200);
+//             // Check for carriage return '\r'
+//             if (incomingByte == '\r') {
+//                 endOfResponse = true;  // Stop reading when <CR> is found
+//                 bmsErrorFlag=0; // connection is success
+//                 lcd.setCursor(7,0);
+//                 lcd.print("   ");
+//                 delay(200);
                 
-            }
+//             }
 
 
-        }
+//         }
 
-            if (millis() - startTime_inverter > timeout_inverter) {
+//             if (millis() - startTime_inverter > timeout_inverter) {
             
-            // lcd.setCursor(0,0);
-            // lcd.print("timeout");
-            bmsErrorFlag=1;
-            break;  // Exit the loop if timeout is reached
-            }
-    }  // end while 
+//             // lcd.setCursor(0,0);
+//             // lcd.print("timeout");
+//             bmsErrorFlag=1;
+//             break;  // Exit the loop if timeout is reached
+//             }
+//     }  // end while 
 
-    // Check if the response matches the expected format
-    if (isValidResponse(receivedData) ) 
-    {
+//     // Check if the response matches the expected format
+//     if (isValidResponse(receivedData) ) 
+//     {
        
 
-        // Extract and print battery voltage
-        batteryVoltage = getValue(receivedData, ' ', 8);  // 9th item (index 8)
-        batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
-       // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
-        loadKW= getValue(receivedData, ' ', 6);  
-        batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
+//         // Extract and print battery voltage
+//         batteryVoltage = getValue(receivedData, ' ', 8);  // 9th item (index 8)
+//         batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
+//        // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
+//         loadKW= getValue(receivedData, ' ', 6);  
+//         batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
 
         
 
 
-    } 
-    else 
-    {    
-            // getting data but reponse is not acceptable 
+//     } 
+//     else 
+//     {    
+//             // getting data but reponse is not acceptable 
 
-            bmsErrorFlag=1;
-           // Serial.println("Response is NOT accepted.");
-            batteryCapacity="0";
-            batteryVoltage="0";
-            batteryDischargeCurrent="0";
-            // lcd.setCursor(0,0);
-            // lcd.print("Error ");  
-            // delay(500);
-            Serial.end(); 
-            delay(500);
-            Serial.begin(2400);
-    }  // end else 
+//             bmsErrorFlag=1;
+//            // Serial.println("Response is NOT accepted.");
+//             batteryCapacity="0";
+//             batteryVoltage="0";
+//             batteryDischargeCurrent="0";
+//             // lcd.setCursor(0,0);
+//             // lcd.print("Error ");  
+//             // delay(500);
+//             Serial.end(); 
+//             delay(500);
+//             Serial.begin(2400);
+//     }  // end else 
 
-    //-> display lcd 
-     if (batteryCapacity == "100") 
-       {
-      formattedBatteryCapacity = "100"; // Keep "100" as is for 100%
-       }
-      else if(batteryCapacity=="0")
-      {
-        formattedBatteryCapacity="0";
+//     //-> display lcd 
+//      if (batteryCapacity == "100") 
+//        {
+//       formattedBatteryCapacity = "100"; // Keep "100" as is for 100%
+//        }
+//       else if(batteryCapacity=="0")
+//       {
+//         formattedBatteryCapacity="0";
       
-      }
+//       }
  
-       else 
-       {
-        formattedBatteryCapacity = batteryCapacity.substring(1); // Remove leading zero for values < 100%
-       }
+//        else 
+//        {
+//         formattedBatteryCapacity = batteryCapacity.substring(1); // Remove leading zero for values < 100%
+//        }
 
-        formattedBatteryVoltage = batteryVoltage.substring(0, 4); // Keep only "24.3
+//         formattedBatteryVoltage = batteryVoltage.substring(0, 4); // Keep only "24.3
         
-       // sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
-       // sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
-        sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
-        lcd.setCursor(0,1);
-        lcd.print(txt);
+//        // sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
+//        // sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
+//         sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
+//         lcd.setCursor(0,1);
+//         lcd.print(txt);
 
-}
-//-------------------------------------------------------------------------------------------
-// Function to validate the received response format
+// }
+// //-------------------------------------------------------------------------------------------
+// // Function to validate the received response format
 // bool isValidResponse(const String& data) {
 //     // Ensure the data is long enough to have all expected parts
 //     if (data.length() < 80) {  // 40 default worked value 
@@ -3133,13 +3133,87 @@ void Read_LiPo4()
 //     String content = data.substring(1, data.length() - 1);
 //     int startIndex = 0;
 //     int spaceIndex;
+
+//   //  // Validate each expected part of the response
+//   //   String expectedFormats[] = {
+//   //       "000.0", // BBB.B  
+//   //       "00.0",  // CC.C
+//   //       "000.0", // DDD.D
+//   //       "00.0",  // EE.E
+//   //       "0000",  // FFFF
+//   //       "0000",  // GGGG
+//   //       "000",   // HHH   load in kw
+//   //       "339",   // III
+//   //       "25.60", // JJ.JJ battery voltage
+//   //       "000",   // KKK
+//   //       "100",   // OOO   battery capacity 
+//   //       "0030"   // TTTT
+//   //   };
+//   //-> this expected string with battery discharge current 
+//     // String expectedFormats[] = {
+//     // "000.0",  // BBB.B  
+//     // "00.0",   // CC.C
+//     // "000.0",  // DDD.D
+//     // "00.0",   // EE.E
+//     // "0000",   // FFFF
+//     // "0000",   // GGGG
+//     // "000",    // HHH   load in kw
+//     // "339",    // III
+//     // "25.60",  // JJ.JJ battery voltage
+//     // "000",    // KKK
+//     // "100",    // OOO   battery capacity 
+//     // "0030",   // TTTT
+//     // "00.0",   // EE.E   input pv1 
+//     // "000.0",  // UUU.U  input pv2 
+//     // "00.00",  // WW.WW  battery voltage from scc
+//     // "00000"   // PPPPP   battery discharge current 
+//     // };
+
+    
+//     // String expectedFormats[] = {
+//     // "000.0",  // BBB.B  
+//     // "00.0",   // CC.C
+//     // "000.0",  // DDD.D
+//     // "00.0",   // EE.E
+//     // "00000",   // FFFFF
+//     // "00000",   // GGGGG
+//     // "000",    // HHH   load in kw
+//     // "339",    // III
+//     // "25.60",  // JJ.JJ battery voltage
+//     // "000",    // KKK
+//     // "100",    // OOO   battery capacity 
+//     // "0030",   // TTTT
+//     // "00.0",   // EE.E   input pv1 
+//     // "000.0",  // UUU.U  input pv2 
+//     // "00.00",  // WW.WW  battery voltage from scc
+//     // "00000"   // PPPPP   battery discharge current 
+//     // };
+// //->
+// //     String expectedFormatsMaxETwin[] = {
+// //     "000.0",
+// //      "00.0", 
+// //      "000.0",
+// //      "00.0", 
+// //      "00000",
+// //      "00000",
+// //      "000",
+// //      "000",
+// //      "00.00",
+// //      "000",
+// //      "000",
+// //      "0000",
+// //      "00.0",
+// //      "000.0",
+// //      "00.00",
+// //      "00000"
+// // };
 //   // Define multiple expected formats
-//       String expectedFormats[][16] = {
+//     String expectedFormats[][16] = {
 
 
-//           { "BBB.B", "CC.C", "DDD.D", "EE.E", "FFFFF", "GGGGG", "HHH", "III", "JJ.JJ", "KKK", "000", "TTTT", "EE.E", "UUU.U", "WW.WW", "PPPPP" },  // MAX - E
-//         //  { "BBB.B", "CC.C", "DDD.D", "EE.E", "FFFF",  "GGGG", "HHH", "III", "JJ.JJ", "KKK", "OO  O", "TTTT", "EE.E", "UUU.U", "WW.WW", "PPPPP" }     //VMII
-//       };
+//         { "000.0", "00.0", "000.0", "00.0", "00000", "00000", "000", "000", "00.00", "000", "000", "0000", "00.0", "000.0", "00.00", "00000" },  // VMII
+//         { "000.0", "00.0" ,"000.0", "00.0", "0000",  "0000", "000", "000", "00.00", "000", "000", "0000", "00.0", "000.0", "00.00", "00000" }     //MAX E TWIN 
+//     };
 
 
 //     // Loop through each format array and test all expected formats then test it and return only true if mataches any format 
@@ -3168,69 +3242,83 @@ void Read_LiPo4()
 //     return false;
 // }
 
-// Function to validate the received response format
-bool isValidResponse(const String& data) {
-    // Ensure the data is long enough to have all expected parts
-    if (data.length() < 80) {  // Ensure the data has enough length for expected values
-        return false;
-    }
+// // Function to check if a segment matches the expected format
+// bool matchesFormat(const String& value, const String& expected) {
+//     if (expected.length() != value.length()) return false;
 
-    // Remove the starting '(' and ending character for processing
-    String content = data.substring(1, data.length() - 1);
-    int startIndex = 0;
-    int spaceIndex;
+//     for (int i = 0; i < expected.length(); i++) {
+//         char expChar = expected.charAt(i);
+//         char valChar = value.charAt(i);
 
-    // Define the expected format structure
-    String expectedFormat[] = {
-        "BBB.B", "CC.C", "DDD.D", "EE.E", "FFFF", "GGGG", "HHH", "III", "JJ.JJ", 
-        "KKK", "000", "TTTT", "EE.E", "UUU.U", "WW.WW", "PPPPP"
-    };
-
-    // Validate that the response has enough segments
-    for (int i = 0; i < 16; i++) {
-        spaceIndex = content.indexOf(' ', startIndex);
-        String segment = (spaceIndex == -1) ? content.substring(startIndex) : content.substring(startIndex, spaceIndex);
-
-        // Check if the segment matches the expected format for that index
-        if (!matchesFormat(segment, expectedFormat[i])) {
-            return false;
-        }
-
-        startIndex = spaceIndex + 1;
-    }
-
-    // Extract the 5th and 6th segments
-    String fifthSegment = content.substring(content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', 0) + 1) + 1) + 1) + 1, 
-                                             content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', 0) + 1) + 1) + 1) + 1));
-    String sixthSegment = content.substring(content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', content.indexOf(' ', 0) + 1) + 1) + 1) + 1) + 1) + 1);
-
-    // Accept if the 5th and 6th segments match either pair: ("FFFFF", "GGGG") OR ("FFFF", "GGG")
-    if ((fifthSegment == "FFFFF" && sixthSegment == "GGGG") || (fifthSegment == "FFFF" && sixthSegment == "GGG")) {
-        return true;
-    }
-
-    return false;
-}
-
-
-// Function to check if a segment matches the expected format
-bool matchesFormat(const String& value, const String& expected) {
-    if (expected.length() != value.length()) return false;
-
-    for (int i = 0; i < expected.length(); i++) {
-        char expChar = expected.charAt(i);
-        char valChar = value.charAt(i);
-
-        if (expChar == '0') {
-            if (!isDigit(valChar)) return false; // Must be a digit
-        } else if (expChar == '.') {
-            if (valChar != '.') return false; // Must be a dot
-        }
-    }
+//         if (expChar == '0') {
+//             if (!isDigit(valChar)) return false; // Must be a digit
+//         } else if (expChar == '.') {
+//             if (valChar != '.') return false; // Must be a dot
+//         }
+//     }
   
-    return true; // Matches the expected format
+//     return true; // Matches the expected format
+// }
+void Read_LiPo4() {
+    pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
+    receivedData = "";
+    endOfResponse = false;
+    startTime_inverter = millis();
+
+    while (!endOfResponse) {
+        if (Serial.available() > 0) {
+            char incomingByte = Serial.read();
+            receivedData += incomingByte;
+
+            if (incomingByte == '\r') {
+                endOfResponse = true;
+                bmsErrorFlag = 0;  // Connection successful
+                lcd.setCursor(7, 0);
+                lcd.print("   ");
+                delay(200);
+            }
+        }
+
+        if (millis() - startTime_inverter > timeout_inverter) {
+            bmsErrorFlag = 1;
+            break;
+        }
+    }
+
+    if (receivedData.length()>0) {
+        batteryVoltage = getValue(receivedData, ' ', 8);
+        batteryCapacity = getValue(receivedData, ' ', 10);
+        loadKW = getValue(receivedData, ' ', 6);
+        batteryDischargeCurrent = getValue(receivedData, ' ', 15);
+
+        // Format and display values
+        formattedBatteryCapacity = (batteryCapacity == "100") ? "100" : batteryCapacity.substring(1);
+        formattedBatteryVoltage = batteryVoltage.substring(0, 4);
+
+        sprintf(txt, "%sV  %s%%  %dA", formattedBatteryVoltage.c_str(), formattedBatteryCapacity.c_str(), batteryDischargeCurrent.toInt());
+        lcd.setCursor(0, 1);
+        lcd.print(txt);
+    } else {
+        bmsErrorFlag = 1;
+        batteryCapacity = "0";
+        batteryVoltage = "0";
+        batteryDischargeCurrent = "0";
+        Serial.end();
+        delay(500);
+        Serial.begin(2400);
+    }
 }
 
+bool isValidResponse(const String& data) {
+    // Ensure the data contains at least the minimum required number of fields
+    int fieldCount = 0;
+    for (int i = 0; i < data.length(); i++) {
+        if (data.charAt(i) == ' ') {
+            fieldCount++;
+        }
+    }
+    return fieldCount >= 15;  // Adjust this number based on the fields you expect
+}
 // Helper function to split and get the Nth value from the response
 String getValue(String data, char separator, int index) {
     int found = 0;
