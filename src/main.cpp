@@ -162,7 +162,7 @@ double VinBatteryError=0;
 
 //- variable for long press 
 bool insideSetup=false;
-char exitProgrampress=500;
+int exitProgrampress=500;
     
 //-----------------------------------------------------------------------------
 struct pipCommands_t{
@@ -273,7 +273,7 @@ lcd.begin(16,2);
 lcd.clear();
 lcd.noCursor();
 lcd.setCursor(0,0);
-lcd.print(" SLC LiPo4 V1.4 ");
+lcd.print(" SLC LiPo4 V1.5 ");
 delay(1500);
 lcd.clear();
 Wire.begin();
@@ -468,20 +468,20 @@ case 1:
    {
              SetTimerOn_1();
 
-              //  unsigned long pressTime = millis();
-              //   while (digitalRead(Set) == 0) 
-              //   {
-              //       if (millis() - pressTime > exitProgrampress)  
-              //       {
-              //           delay(200);  // Debouncing
+               unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  
+                    {
+                        delay(200);  // Debouncing
 
-              //           insideSetup=false;
-              //           lcd.setCursor(0,0);
-              //           lcd.print("Exiting Program");
-              //           delay(1000);
-              //           return;   // to exit setup 
-              //       }
-              //   }
+                        insideSetup=false;
+                        // lcd.setCursor(0,0);
+                        // lcd.print("Exiting Program");
+                        // delay(1000);
+                        return;   // to exit setup 
+                    }
+                }
     }
    
    break ; 
@@ -493,16 +493,16 @@ case 2:
    {
    SetTimerOff_1();
 
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    
    }
    break ; 
@@ -513,16 +513,16 @@ case 3:
    while (digitalRead(Set)==0)
    {
    SetTimerOn_2();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 
@@ -533,16 +533,16 @@ case 4 :
    while (digitalRead(Set)==0)
    {
    SetTimerOff_2();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 
@@ -554,16 +554,16 @@ case 4 :
    while (digitalRead(Set)==0)
    {
    SetBatteryType();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 
@@ -574,16 +574,16 @@ case 6:
    while (digitalRead(Set)==0)
    {
    SetLowBatteryVoltage();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 case 7:
@@ -593,16 +593,16 @@ case 7:
    while (digitalRead(Set)==0)
    {
    SetStartUpLoadsVoltage();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 case 8:
@@ -612,16 +612,16 @@ case 8:
    while (digitalRead(Set)==0)
    {
     Startup_Timers();
-                //  unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                 unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 
@@ -632,16 +632,16 @@ case 8:
    while (digitalRead(Set)==0)
    {
     DelayOff();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 case 10 :
@@ -651,16 +651,16 @@ case 10 :
    while (digitalRead(Set)==0)
    {
    SetVoltageMode();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 
@@ -671,16 +671,16 @@ case 11 :
    while (digitalRead(Set)==0)
    {
    SetUPSMode();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 case 12 :
@@ -701,16 +701,16 @@ case 12 :
    while (digitalRead(Set)==0)
    {
    SetDS1307_Time();    
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
+                unsigned long pressTime = millis();
+                while (digitalRead(Set) == 0) 
+                {
+                    if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
+                    {
+                        delay(200);  // Debouncing
+                        insideSetup=false;
+                        return;  // الخروج من SetUpProgram بالكامل
+                    }
+                }
    }
    break ; 
 }
@@ -3291,8 +3291,8 @@ void Read_LiPo4()
 
             if (millis() - startTime_inverter > timeout_inverter) {
             
-            // lcd.setCursor(0,0);
-            // lcd.print("timeout");
+            lcd.setCursor(7,0);
+            lcd.print("ERR");
             bmsErrorFlag=1;
             break;  // Exit the loop if timeout is reached
             }
