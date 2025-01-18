@@ -54,7 +54,7 @@ char t[32];
  #define Backlight 9
  #define Exit A0
  #define Flash 4
- #define LONG_PRESS_DURATION 2000
+
 //-----------------------------------------Variables----------------------------
 //unsigned short old_time_compare_pv,old_time_update_pv,old_time_screen_1=0,old_time_screen_2=0; // to async
 char set_status=0;    //variable for the set button state
@@ -64,8 +64,8 @@ char seconds_lcd_2=0,minutes_lcd_2=0,hours_lcd_2=0;
 char hours_lcd_timer2_start=0,hours_lcd_timer2_stop=0,seconds_lcd_timer2_start=0;
 char minutes_lcd_timer2_start=0,minutes_lcd_timer2_stop=0,seconds_lcd_timer2_stop=0;
 char Relay_State; // variable for toggling relay
-char set_ds1307_minutes=0,set_ds1307_hours=0,set_ds1307_seconds=0,set_ds1307_day=1,set_ds1307_month=1;
-uint16_t set_ds1307_year=2024;
+char set_ds1307_minutes=0,set_ds1307_hours=0,set_ds1307_seconds=0,set_ds1307_day=0,set_ds1307_month=0;
+uint16_t set_ds1307_year=2023;
 char ByPassState=0;    //enabled is default 0 is enabled and 1 is disabled
 float Battery_Voltage,PV_Voltage,Vin_PV,Vin_PV_Old=0,Vin_PV_Present=0;
 char BatteryVoltageSystem=0; // to save the battery voltage system if it is 12v/24v/48v
@@ -156,13 +156,9 @@ double VinBatteryError=0;
     const unsigned long timeout_inverter = 1000;  // Set timeout to 2 seconds (2000 milliseconds)
     String formattedBatteryVoltage="",formattedBatteryCapacity="";
     char bmsErrorFlag=0;
-    String loadKW;
+    float loadKW;
     String batteryDischargeCurrent="";
 
-
-//- variable for long press 
-bool insideSetup=false;
-char exitProgrampress=500;
     
 //-----------------------------------------------------------------------------
 struct pipCommands_t{
@@ -240,7 +236,6 @@ void SetUPSMode();
 void SetDS1307_Date();
 void DelayOff();
 void SetBatteryType();
-bool isLongPress();
 //-------------------------LIPO4 Functions-----------------------------------------------
 void pipSend(unsigned char *cmd, int len);
 uint16_t crc16(const uint8_t* data, uint8_t length);
@@ -273,12 +268,12 @@ lcd.begin(16,2);
 lcd.clear();
 lcd.noCursor();
 lcd.setCursor(0,0);
-lcd.print(" SLC LiPo4 V1.2 ");
+lcd.print(" SLC LiPo4 V1.0 ");
 delay(1500);
 lcd.clear();
 Wire.begin();
 rtc.begin();
-Wire.setWireTimeout(3000,true);   //refe : https://www.fpaynter.com/2020/07/i2c-hangup-bug-cured-miracle-of-miracles-film-at-11/
+Wire.setWireTimeout(1000,true);   //refe : https://www.fpaynter.com/2020/07/i2c-hangup-bug-cured-miracle-of-miracles-film-at-11/
 Wire.clearWireTimeoutFlag();
 Serial.begin(2400);
 }
@@ -450,12 +445,11 @@ lcd.clear();
 lcd.setCursor(0,0);
 lcd.print("Setup Program");
 programNumber=1;
-insideSetup=true;
 digitalWrite(Flash,0); // turn off flash
 delay(1500);
 //---------------------------------Enter Programs ------------------------------
 //-> enter setup mode and don't exit it until the user hit set button
-while (insideSetup)
+while (digitalRead(Set)==1)
 {
 
 switch (programNumber)
@@ -466,24 +460,8 @@ case 1:
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-              SetTimerOn_1();
-
-              //  unsigned long pressTime = millis();
-              //   while (digitalRead(Set) == 0) 
-              //   {
-              //       if (millis() - pressTime > exitProgrampress)  
-              //       {
-              //           delay(200);  // Debouncing
-
-              //           insideSetup=false;
-              //           lcd.setCursor(0,0);
-              //           lcd.print("Exiting Program");
-              //           delay(1000);
-              //           return;   // to exit setup 
-              //       }
-              //   }
-    }
-   
+    SetTimerOn_1();
+   }
    break ; 
 case 2: 
    sprintf(txt,"[2] H:%02d-M:%02d   ",hours_lcd_2,minutes_lcd_2);
@@ -492,18 +470,6 @@ case 2:
    while (digitalRead(Set)==0)
    {
    SetTimerOff_1();
-
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
-   
    }
    break ; 
 case 3: 
@@ -513,16 +479,6 @@ case 3:
    while (digitalRead(Set)==0)
    {
    SetTimerOn_2();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 
@@ -533,16 +489,6 @@ case 4 :
    while (digitalRead(Set)==0)
    {
    SetTimerOff_2();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 
@@ -554,16 +500,6 @@ case 4 :
    while (digitalRead(Set)==0)
    {
    SetBatteryType();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 
@@ -574,16 +510,6 @@ case 6:
    while (digitalRead(Set)==0)
    {
    SetLowBatteryVoltage();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 case 7:
@@ -593,16 +519,6 @@ case 7:
    while (digitalRead(Set)==0)
    {
    SetStartUpLoadsVoltage();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 case 8:
@@ -612,16 +528,6 @@ case 8:
    while (digitalRead(Set)==0)
    {
     Startup_Timers();
-                //  unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 
@@ -632,16 +538,6 @@ case 8:
    while (digitalRead(Set)==0)
    {
     DelayOff();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 case 10 :
@@ -651,16 +547,6 @@ case 10 :
    while (digitalRead(Set)==0)
    {
    SetVoltageMode();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 
@@ -671,16 +557,6 @@ case 11 :
    while (digitalRead(Set)==0)
    {
    SetUPSMode();
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 case 12 :
@@ -701,19 +577,14 @@ case 12 :
    while (digitalRead(Set)==0)
    {
    SetDS1307_Time();    
-                // unsigned long pressTime = millis();
-                // while (digitalRead(Set) == 0) 
-                // {
-                //     if (millis() - pressTime > exitProgrampress)  // إذا كان الضغط أكثر من 2 ثانية
-                //     {
-                //         delay(200);  // Debouncing
-                //         insideSetup=false;
-                //         return;  // الخروج من SetUpProgram بالكامل
-                //     }
-                // }
    }
    break ; 
 }
+
+
+
+
+
 }   // end switch numbers 
 
 //---------------------------------------------NAVIGATION----------------------------------------
@@ -729,9 +600,10 @@ if(digitalRead(Decrement)==1)
   delay(200);
   programNumber--;  
 }
-if (programNumber>12)  programNumber=1;
-if (programNumber<1)   programNumber=12;
+if (programNumber>12)  programNumber=12;
+if (programNumber<1)   programNumber=1;
 } // end while increment and decrement 
+
 }  // end main while 
 }  // end function 
 //-----------------------------Setting Hour Timer 1-----------------------------
@@ -1719,7 +1591,7 @@ while (digitalRead(Set)==1 )
 //-> to make sure that the value will never be changed until the user press increment or decrement
 while (digitalRead(Increment) == 1 || digitalRead(Decrement)==1)
 {
-  sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
+   sprintf((char*)txt,"[12] H:%02d-M:%02d ",set_ds1307_hours,set_ds1307_minutes);
   lcd.setCursor(0,0);
   lcd.print(txt);
 if (digitalRead(Increment)==1 )
@@ -2312,8 +2184,8 @@ StartLoadsVoltage_T2=52.0;
 // Mini_Battery_Voltage_T2=70.0,
 // StartLoadsVoltage_T2=90.0; 
 // }
-startupTIme_1 =15;
-startupTIme_2=20;
+startupTIme_1 =10;
+startupTIme_2=15;
 offDelay_1=15;
 offDelay_2=25;
 addError=1;
@@ -3070,7 +2942,6 @@ void Read_LiPo4()
         batteryVoltage = getValue(receivedData, ' ', 8);  // 9th item (index 8)
         batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
        // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
-        loadKW= getValue(receivedData, ' ', 6);  
         batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
 
         
@@ -3092,8 +2963,21 @@ void Read_LiPo4()
             Serial.end(); 
             delay(500);
             Serial.begin(2400);
+
+        
+
+
     }  // end else 
 
+
+ //-.Sometimes after inverter power off and then on, sometimes values is zero but bms is working 
+ //-> so if bms working and variables are empty must restart the connection 
+
+//  if (bmsErrorFlag==0 && batteryCapacity=="0" )
+//  {
+//   lcd.setCursor(10,1);
+//   lcd.print("error");
+//  }
     //-> display lcd 
      if (batteryCapacity == "100") 
        {
@@ -3113,7 +2997,6 @@ void Read_LiPo4()
         formattedBatteryVoltage = batteryVoltage.substring(0, 4); // Keep only "24.3
         
        // sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
-       // sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
         sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
         lcd.setCursor(0,1);
         lcd.print(txt);
@@ -3134,21 +3017,7 @@ bool isValidResponse(const String& data) {
     int startIndex = 0;
     int spaceIndex;
 
-  //  // Validate each expected part of the response
-  //   String expectedFormats[] = {
-  //       "000.0", // BBB.B  
-  //       "00.0",  // CC.C
-  //       "000.0", // DDD.D
-  //       "00.0",  // EE.E
-  //       "0000",  // FFFF
-  //       "0000",  // GGGG
-  //       "000",   // HHH   load in kw
-  //       "339",   // III
-  //       "25.60", // JJ.JJ battery voltage
-  //       "000",   // KKK
-  //       "100",   // OOO   battery capacity 
-  //       "0030"   // TTTT
-  //   };
+
   //-> this expected string with battery discharge current 
     // String expectedFormats[] = {
     // "000.0",  // BBB.B  
@@ -3169,77 +3038,47 @@ bool isValidResponse(const String& data) {
     // "00000"   // PPPPP   battery discharge current 
     // };
 
-    
-    // String expectedFormats[] = {
-    // "000.0",  // BBB.B  
-    // "00.0",   // CC.C
-    // "000.0",  // DDD.D
-    // "00.0",   // EE.E
-    // "00000",   // FFFFF
-    // "00000",   // GGGGG
-    // "000",    // HHH   load in kw
-    // "339",    // III
-    // "25.60",  // JJ.JJ battery voltage
-    // "000",    // KKK
-    // "100",    // OOO   battery capacity 
-    // "0030",   // TTTT
-    // "00.0",   // EE.E   input pv1 
-    // "000.0",  // UUU.U  input pv2 
-    // "00.00",  // WW.WW  battery voltage from scc
-    // "00000"   // PPPPP   battery discharge current 
-    // };
-//->
-//     String expectedFormatsMaxETwin[] = {
-//     "000.0",
-//      "00.0", 
-//      "000.0",
-//      "00.0", 
-//      "00000",
-//      "00000",
-//      "000",
-//      "000",
-//      "00.00",
-//      "000",
-//      "000",
-//      "0000",
-//      "00.0",
-//      "000.0",
-//      "00.00",
-//      "00000"
-// };
-  // Define multiple expected formats
-    String expectedFormats[][16] = {
-
-
-        { "000.0", "00.0", "000.0", "00.0", "00000", "00000", "000", "000", "00.00", "000", "000", "0000", "00.0", "000.0", "00.00", "00000" },  // VMII
-       // { "BBB.B", "CC.C", "DDD.D", "EE.E", "FFFF", "GGGG", "HHH", "III", "JJ.JJ", "KKK", "OOO", "TTTT", "EE.E", "UUU.U", "WW.WW", "PPPPP" }     //MAX E TWIN 
+// REPONSE OF MAX-E TWIN
+    String expectedFormats[] = { 
+    "000.0",  // BBB.B  
+    "00.0",   // CC.C
+    "000.0",  // DDD.D
+    "00.0",   // EE.E
+    "00000",   // FFFFF
+    "00000",   // GGGGG
+    "000",    // HHH   load in kw
+    "339",    // III
+    "25.60",  // JJ.JJ battery voltage
+    "000",    // KKK
+    "100",    // OOO   battery capacity 
+    "0030",   // TTTT
+    "00.0",   // EE.E   input pv1 
+    "000.0",  // UUU.U  input pv2 
+    "00.00",  // WW.WW  battery voltage from scc
+    "00000"   // PPPPP   battery discharge current 
     };
 
+    for (int i = 0; i < sizeof(expectedFormats) / sizeof(expectedFormats[0]); i++) {
+        spaceIndex = content.indexOf(' ', startIndex);
+        String segment;
 
-    // Loop through each format array and test all expected formats then test it and return only true if mataches any format 
-    for (int f = 0; f < sizeof(expectedFormats) / sizeof(expectedFormats[0]); f++) {
-        startIndex = 0;
-        bool isFormatValid = true;
-
-        for (int i = 0; i < 16; i++) {
-            spaceIndex = content.indexOf(' ', startIndex);
-            String segment = (spaceIndex == -1) ? content.substring(startIndex) : content.substring(startIndex, spaceIndex);
-
-            if (!matchesFormat(segment, expectedFormats[f][i])) {
-                isFormatValid = false;
-                break;
-            }
-            startIndex = spaceIndex + 1;
+        // If no space is found, this is the last segment
+        if (spaceIndex == -1) {
+            segment = content.substring(startIndex);
+        } else {
+            segment = content.substring(startIndex, spaceIndex);
         }
 
-        // If one format matches, return true
-        if (isFormatValid) {
-            return true;
+        // Check the segment against the expected format
+        if (!matchesFormat(segment, expectedFormats[i])) {
+            return false; // Format mismatch
         }
+
+        // Move startIndex to the next part
+        startIndex = spaceIndex + 1;
     }
 
-    // No formats matched
-    return false;
+    return true; // All parts match the expected format
 }
 
 // Function to check if a segment matches the expected format
@@ -3318,9 +3157,6 @@ void pipSend(unsigned char *cmd, int len) {
     Serial.write(crc >> 8);    // CRC high byte
     Serial.write(0x0d);        // Carriage return
 }
-
-//-------------------------------------------------------------------------------------------------
-
 
 //---------------------------------------MAIN LOOP-------------------------------------------------
 void setup() {
