@@ -3259,56 +3259,103 @@ void clearSerialBuffer() {
   
 //     return true; // Matches the expected format
 // }
-void Read_LiPo4() {
-    pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
-    receivedData = "";
-    endOfResponse = false;
-    startTime_inverter = millis();
+
+void Read_LiPo4()
+{
+
+  
+     
+     pipSend(pipCommands.qpigs, sizeof(pipCommands.qpigs));
+    // Read and print the incoming serial data from the inverter until <CR>
+     receivedData = "";
+     endOfResponse = false;  // Flag to indicate when end of response is found
+     startTime_inverter = millis();  // Record the start time
 
     while (!endOfResponse) {
-        if (Serial.available() > 0) {
+        if (Serial.available()>0) { // very important 
             char incomingByte = Serial.read();
             receivedData += incomingByte;
 
+            // Check for carriage return '\r'
             if (incomingByte == '\r') {
-                endOfResponse = true;
-                bmsErrorFlag = 0;  // Connection successful
-                lcd.setCursor(7, 0);
+                endOfResponse = true;  // Stop reading when <CR> is found
+                bmsErrorFlag=0; // connection is success
+                lcd.setCursor(7,0);
                 lcd.print("   ");
                 delay(200);
+                
             }
+
+
         }
 
-        if (millis() - startTime_inverter > timeout_inverter) {
-            bmsErrorFlag = 1;
-            break;
-        }
-    }
+            if (millis() - startTime_inverter > timeout_inverter) {
+            
+            // lcd.setCursor(0,0);
+            // lcd.print("timeout");
+            bmsErrorFlag=1;
+            break;  // Exit the loop if timeout is reached
+            }
+    }  // end while 
 
-    if (receivedData.length()>0) {
-        batteryVoltage = getValue(receivedData, ' ', 8);
-        batteryCapacity = getValue(receivedData, ' ', 10);
-        loadKW = getValue(receivedData, ' ', 6);
-        batteryDischargeCurrent = getValue(receivedData, ' ', 15);
+    // Check if the response matches the expected format
+    if (receivedData.length()>0 ) 
+    {
+       
 
-        // Format and display values
-        formattedBatteryCapacity = (batteryCapacity == "100") ? "100" : batteryCapacity.substring(1);
-        formattedBatteryVoltage = batteryVoltage.substring(0, 4);
+        // Extract and print battery voltage
+        batteryVoltage = getValue(receivedData, ' ', 8);  // 9th item (index 8)
+        batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
+       // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
+        loadKW= getValue(receivedData, ' ', 6);  
+        batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
 
-        sprintf(txt, "%sV  %s%%  %dA", formattedBatteryVoltage.c_str(), formattedBatteryCapacity.c_str(), batteryDischargeCurrent.toInt());
-        lcd.setCursor(0, 1);
+        
+
+
+    } 
+    else 
+    {    
+            // getting data but reponse is not acceptable 
+
+            bmsErrorFlag=1;
+           // Serial.println("Response is NOT accepted.");
+            batteryCapacity="0";
+            batteryVoltage="0";
+            batteryDischargeCurrent="0";
+            // lcd.setCursor(0,0);
+            // lcd.print("Error ");  
+            // delay(500);
+            Serial.end(); 
+            delay(500);
+            Serial.begin(2400);
+    }  // end else 
+
+    //-> display lcd 
+     if (batteryCapacity == "100") 
+       {
+      formattedBatteryCapacity = "100"; // Keep "100" as is for 100%
+       }
+      else if(batteryCapacity=="0")
+      {
+        formattedBatteryCapacity="0";
+      
+      }
+ 
+       else 
+       {
+        formattedBatteryCapacity = batteryCapacity.substring(1); // Remove leading zero for values < 100%
+       }
+
+        formattedBatteryVoltage = batteryVoltage.substring(0, 4); // Keep only "24.3
+        
+       // sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
+       // sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
+        sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
+        lcd.setCursor(0,1);
         lcd.print(txt);
-    } else {
-        bmsErrorFlag = 1;
-        batteryCapacity = "0";
-        batteryVoltage = "0";
-        batteryDischargeCurrent = "0";
-        Serial.end();
-        delay(500);
-        Serial.begin(2400);
-    }
-}
 
+}
 bool isValidResponse(const String& data) {
     // Ensure the data contains at least the minimum required number of fields
     int fieldCount = 0;
