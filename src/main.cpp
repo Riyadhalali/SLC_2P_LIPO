@@ -466,7 +466,7 @@ case 1:
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-           //   SetTimerOn_1();
+             SetTimerOn_1();
 
               //  unsigned long pressTime = millis();
               //   while (digitalRead(Set) == 0) 
@@ -553,7 +553,7 @@ case 4 :
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-   SetBatteryType();
+   //SetBatteryType();
                 // unsigned long pressTime = millis();
                 // while (digitalRead(Set) == 0) 
                 // {
@@ -670,7 +670,7 @@ case 11 :
    lcd.print(txt);
    while (digitalRead(Set)==0)
    {
-   SetUPSMode();
+   //SetUPSMode();
                 // unsigned long pressTime = millis();
                 // while (digitalRead(Set) == 0) 
                 // {
@@ -3133,80 +3133,6 @@ void Read_LiPo4()
 //     String content = data.substring(1, data.length() - 1);
 //     int startIndex = 0;
 //     int spaceIndex;
-
-//   //  // Validate each expected part of the response
-//   //   String expectedFormats[] = {
-//   //       "000.0", // BBB.B  
-//   //       "00.0",  // CC.C
-//   //       "000.0", // DDD.D
-//   //       "00.0",  // EE.E
-//   //       "0000",  // FFFF
-//   //       "0000",  // GGGG
-//   //       "000",   // HHH   load in kw
-//   //       "339",   // III
-//   //       "25.60", // JJ.JJ battery voltage
-//   //       "000",   // KKK
-//   //       "100",   // OOO   battery capacity 
-//   //       "0030"   // TTTT
-//   //   };
-//   //-> this expected string with battery discharge current 
-//     // String expectedFormats[] = {
-//     // "000.0",  // BBB.B  
-//     // "00.0",   // CC.C
-//     // "000.0",  // DDD.D
-//     // "00.0",   // EE.E
-//     // "0000",   // FFFF
-//     // "0000",   // GGGG
-//     // "000",    // HHH   load in kw
-//     // "339",    // III
-//     // "25.60",  // JJ.JJ battery voltage
-//     // "000",    // KKK
-//     // "100",    // OOO   battery capacity 
-//     // "0030",   // TTTT
-//     // "00.0",   // EE.E   input pv1 
-//     // "000.0",  // UUU.U  input pv2 
-//     // "00.00",  // WW.WW  battery voltage from scc
-//     // "00000"   // PPPPP   battery discharge current 
-//     // };
-
-    
-//     // String expectedFormats[] = {
-//     // "000.0",  // BBB.B  
-//     // "00.0",   // CC.C
-//     // "000.0",  // DDD.D
-//     // "00.0",   // EE.E
-//     // "00000",   // FFFFF
-//     // "00000",   // GGGGG
-//     // "000",    // HHH   load in kw
-//     // "339",    // III
-//     // "25.60",  // JJ.JJ battery voltage
-//     // "000",    // KKK
-//     // "100",    // OOO   battery capacity 
-//     // "0030",   // TTTT
-//     // "00.0",   // EE.E   input pv1 
-//     // "000.0",  // UUU.U  input pv2 
-//     // "00.00",  // WW.WW  battery voltage from scc
-//     // "00000"   // PPPPP   battery discharge current 
-//     // };
-// //->
-// //     String expectedFormatsMaxETwin[] = {
-// //     "000.0",
-// //      "00.0", 
-// //      "000.0",
-// //      "00.0", 
-// //      "00000",
-// //      "00000",
-// //      "000",
-// //      "000",
-// //      "00.00",
-// //      "000",
-// //      "000",
-// //      "0000",
-// //      "00.0",
-// //      "000.0",
-// //      "00.00",
-// //      "00000"
-// // };
 //   // Define multiple expected formats
 //       String expectedFormats[][16] = {
 
