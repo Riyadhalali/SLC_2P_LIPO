@@ -156,7 +156,7 @@ double VinBatteryError=0;
     const unsigned long timeout_inverter = 1000;  // Set timeout to 2 seconds (2000 milliseconds)
     String formattedBatteryVoltage="",formattedBatteryCapacity="";
     char bmsErrorFlag=0;
-    float loadKW;
+    String loadKW;
     String batteryDischargeCurrent="";
 
 
@@ -3070,6 +3070,7 @@ void Read_LiPo4()
         batteryVoltage = getValue(receivedData, ' ', 8);  // 9th item (index 8)
         batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
        // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
+        loadKW= getValue(receivedData, ' ', 6);  
         batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
 
         
@@ -3091,21 +3092,8 @@ void Read_LiPo4()
             Serial.end(); 
             delay(500);
             Serial.begin(2400);
-
-        
-
-
     }  // end else 
 
-
- //-.Sometimes after inverter power off and then on, sometimes values is zero but bms is working 
- //-> so if bms working and variables are empty must restart the connection 
-
-//  if (bmsErrorFlag==0 && batteryCapacity=="0" )
-//  {
-//   lcd.setCursor(10,1);
-//   lcd.print("error");
-//  }
     //-> display lcd 
      if (batteryCapacity == "100") 
        {
@@ -3125,6 +3113,7 @@ void Read_LiPo4()
         formattedBatteryVoltage = batteryVoltage.substring(0, 4); // Keep only "24.3
         
        // sprintf(txt,"%sV      %s%%      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str());
+       // sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
         sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
         lcd.setCursor(0,1);
         lcd.print(txt);
