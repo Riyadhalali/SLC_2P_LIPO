@@ -158,6 +158,7 @@ double VinBatteryError=0;
     char bmsErrorFlag=0;
     String loadKW;
     String batteryDischargeCurrent="";
+    int dischargeCurrent=0;
 
 
 //- variable for long press 
@@ -248,6 +249,7 @@ String getValue(String data, char separator, int index);
 bool matchesFormat(const String& value, const String& expected);
 bool isValidResponse(const String& data);
 void Read_LiPo4();
+void SetDischargeCurrent();
 //---------------------------------------------------------------------------------------
 void Gpio_Init()
 {
@@ -273,7 +275,7 @@ lcd.begin(16,2);
 lcd.clear();
 lcd.noCursor();
 lcd.setCursor(0,0);
-lcd.print(" SLC LiPo4 V1.5 ");
+lcd.print(" SLC LiPo4 V1.6 ");
 delay(1500);
 lcd.clear();
 Wire.begin();
@@ -2046,6 +2048,7 @@ EEPROM.write(50,batteryTypeLiPo4); // ups mode
 delay(500);
 
 }
+
  //-------------------------------CHECK TIMER IN RANGE--------------------------------------------
  //-------------------Check for timer activation inside range--------------------
  void CheckForTimerActivationInRange()
@@ -2620,7 +2623,7 @@ if (  SecondsRealTimePv_ReConnect_T2 > startupTIme_2)
 }
 }
 //-------------------------------RunOnBatteryMode-------------------------------
- if ( digitalRead(AC_Available)==1 && Vin_Battery >= StartLoadsVoltage && RunWithOutBattery==false && TurnOffLoadsByPass==0 && RunOnBatteryVoltageMode ==1 )
+ if ( digitalRead(AC_Available)==1 && Vin_Battery >= StartLoadsVoltage && RunWithOutBattery==false && TurnOffLoadsByPass==0 && RunOnBatteryVoltageMode ==1 && dischargeCurrent <= 0 )
 {
 
 //SecondsRealTimePv_ReConnect_T1++;
@@ -2659,6 +2662,13 @@ relayState_1=0;
 Start_Timer_0_A();         // give some time for battery voltage
 }
 
+
+if (dischargeCurrent >=5 &&  digitalRead(AC_Available)==1  && RunWithOutBattery==false )
+{
+CountCutSecondsRealTime_T1=1;
+relayState_1=0;
+Start_Timer_0_A();         // give some time for battery voltage
+}
 //--Turn Load off when battery Voltage  is Low and AC Not available and Bypass is enabled
 if (Vin_Battery<Mini_Battery_Voltage_T2 &&  digitalRead(AC_Available)==1  &&  RunWithOutBattery==false )
 {
@@ -2672,7 +2682,7 @@ void Start_Timer_0_A()
 {
 //Read_Battery();
  //********************************Turn Off loads*******************************
-if( CutSecondsRealTime_T1>= offDelay_1 &&  Vin_Battery<Mini_Battery_Voltage && digitalRead(AC_Available)==1 && RunLoadsByBass==0 )
+if( CutSecondsRealTime_T1>= offDelay_1 &&  Vin_Battery<Mini_Battery_Voltage && digitalRead(AC_Available)==1 && RunLoadsByBass==0  )
 {
 CutSecondsRealTime_T1=0;
 CountCutSecondsRealTime_T1=0;
@@ -2682,7 +2692,17 @@ digitalWrite(Relay_L_Solar,0);
 relayState_1=0; 
 }
 
-if( CutSecondsRealTime_T2>= offDelay_2 && Vin_Battery<Mini_Battery_Voltage_T2 && digitalRead(AC_Available)==1  && RunLoadsByBass==0)
+if( CutSecondsRealTime_T1>= offDelay_1 &&  dischargeCurrent>5 && digitalRead(AC_Available)==1 && RunLoadsByBass==0  )
+{
+CutSecondsRealTime_T1=0;
+CountCutSecondsRealTime_T1=0;
+CountSecondsRealTimePv_ReConnect_T1=0;
+SecondsRealTimePv_ReConnect_T1=0;
+digitalWrite(Relay_L_Solar,0);
+relayState_1=0; 
+}
+
+if( CutSecondsRealTime_T2>= offDelay_2 && Vin_Battery<Mini_Battery_Voltage_T2 && digitalRead(AC_Available)==1  && RunLoadsByBass==0 )
 {
 CutSecondsRealTime_T2=0;
 CountCutSecondsRealTime_T2=0;
@@ -3307,7 +3327,7 @@ void Read_LiPo4()
         batteryVoltage = getValue(receivedData, ' ', 8);  // 9th item (index 8)
         batteryCapacity = getValue(receivedData, ' ', 10); // 11th item (index 10)
        // loadKW= getValue(receivedData, ' ', 6).toFloat();  // new way
-        loadKW= getValue(receivedData, ' ', 6);  
+     //   loadKW= getValue(receivedData, ' ', 6);  
         batteryDischargeCurrent = getValue(receivedData, ' ', 15); // 16th item (index 16
 
         
@@ -3354,6 +3374,8 @@ void Read_LiPo4()
         sprintf(txt,"%sV  %s%%  %dA      ",formattedBatteryVoltage.c_str(),formattedBatteryCapacity.c_str(),batteryDischargeCurrent.toInt());
         lcd.setCursor(0,1);
         lcd.print(txt);
+
+        dischargeCurrent=batteryDischargeCurrent.toInt();  // for reading current and set it
 
 }
 bool isValidResponse(const String& data) {
